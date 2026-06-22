@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { slide } from 'svelte/transition';
 
-	// Interface for navigation links
+	// Define interface for navigation links
 	interface NavItem {
 		label: string;
 		href: string;
@@ -11,23 +11,18 @@
 	// Props configuration using Svelte 5 runes
 	let {
 		navItems = [
-			{ label: 'Home', href: '/' },
-			{ label: 'Tracks', href: '/tracks' },
-			{ label: 'Activities', href: '/activities' },
-			{ label: 'Leaderboard', href: '/leaderboard' },
-			{ label: 'Reports', href: '/reports' },
-			{ label: 'About', href: '/about' },
-			{ label: 'Contact', href: '/contact' }
+			{ label: 'Overview', href: '/' },
+			{ label: 'Skill Tracks', href: '#tracks' },
+			{ label: 'Activities', href: '#activities' },
+			{ label: 'Leaderboard', href: '#leaderboard' },
+			{ label: 'Grading Scheme', href: '#grading-scheme' }
 		] as NavItem[],
-		loginHref = '/login',
-		ctaHref = '/get-started',
-		ctaText = 'Get Started'
+		loginHref = '/login'
 	} = $props();
 
 	// Reactive state for the mobile menu drawer
 	let isOpen = $state(false);
 
-	// Toggle state handlers
 	function toggleMenu() {
 		isOpen = !isOpen;
 	}
@@ -42,55 +37,37 @@
 		if (href === '/') {
 			return path === '/';
 		}
+		if (href.startsWith('#')) {
+			// In production, we're on the same page, active state is handled by hashes or scroll
+			return false;
+		}
 		return path === href || path.startsWith(href + '/');
 	}
 </script>
 
 <!-- Sticky wrapper -->
-<header class="sticky top-0 z-50 w-full bg-white border-b border-border-gray shadow-sm backdrop-blur-md/95">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<header class="sticky top-0 z-50 w-full bg-bg-warm/95 backdrop-blur-md border-b border-border-gray">
+	<div class="max-w-7xl mx-auto px-6 lg:px-8">
 		<div class="flex items-center justify-between h-[72px]">
 			
-			<!-- Left Section: Logo & Branding -->
-			<a href="/" onclick={closeMenu} class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue focus-visible:ring-offset-2 rounded-xl transition-all duration-200">
-				<!-- Custom SVG Logo matching the Figma design -->
-				<div class="relative w-10 h-10 flex items-center justify-center rounded-xl shadow-md shadow-primary-blue/10 group-hover:shadow-lg group-hover:shadow-primary-blue/20 transition-all duration-300">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" class="w-10 h-10" fill="none">
-						<defs>
-							<linearGradient id="logo-bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-								<stop offset="0%" stop-color="#123A84" />
-								<stop offset="100%" stop-color="#0A1931" />
-							</linearGradient>
-							<linearGradient id="spark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-								<stop offset="0%" stop-color="#FFD700" />
-								<stop offset="100%" stop-color="#F4B400" />
-							</linearGradient>
-						</defs>
-						<!-- Squircle container -->
-						<rect width="40" height="40" rx="12" fill="url(#logo-bg-grad)" />
-						<!-- Main 4-pointed Spark Star -->
-						<path d="M20 9C20 15 21.5 19 27 20C21.5 21 20 25 20 31C20 25 18.5 21 13 20C18.5 19 20 15 20 9Z" fill="url(#spark-grad)" />
-						<!-- Accent Small Star -->
-						<path d="M29 11C29 12.5 29.5 13.5 31 14C29.5 14.5 29 15.5 29 17C29 15.5 28.5 14.5 27 14C28.5 13.5 29 12.5 29 11Z" fill="url(#spark-grad)" opacity="0.8" />
-						<!-- Spark/Orbit Ring -->
-						<path d="M12 28C13 30 17 31 20 30C25 28.5 27.5 22 25 18" stroke="#F4B400" stroke-width="1.2" stroke-linecap="round" opacity="0.5" />
-					</svg>
-				</div>
-				<!-- Brand Text -->
+			<!-- Left Section: Academic Logo & Branding -->
+			<a href="/" onclick={closeMenu} class="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 rounded-lg transition-all duration-200">
 				<div class="flex flex-col justify-center">
-					<span class="text-xl font-bold tracking-tight text-primary-blue leading-none transition-colors group-hover:text-primary-blue/90 font-sans">iSPARC</span>
-					<span class="text-[9px] font-bold text-gray-400 tracking-wider mt-0.5 uppercase font-sans">IIPS DAVV</span>
+					<div class="flex items-baseline text-2xl font-bold tracking-tight text-primary-dark font-sans leading-none">
+						<span class="text-slate-900">i</span><span class="text-[#881B1B]">SPARC</span>
+					</div>
+					<span class="text-[9px] font-bold text-slate-500 tracking-widest mt-1 uppercase font-sans">IIPS DAVV CELL</span>
 				</div>
 			</a>
 
-			<!-- Center Section: Desktop Navigation Links -->
-			<nav class="hidden lg:flex items-center gap-7" aria-label="Desktop Navigation">
+			<!-- Center Section: Desktop Navigation Links (Uppercase, institutional) -->
+			<nav class="hidden md:flex items-center gap-7" aria-label="Desktop Navigation">
 				<ul class="flex items-center gap-7">
 					{#each navItems as item}
 						<li>
 							<a
 								href={item.href}
-								class="text-[15px] transition-all duration-200 hover:text-primary-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue focus-visible:ring-offset-2 rounded-md px-2 py-1 font-sans {isActive(item.href) ? 'text-primary-blue font-semibold' : 'text-slate-500 font-medium'}"
+								class="text-xs font-bold tracking-wider uppercase transition-all duration-200 hover:text-accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-1 rounded-md px-2 py-1 font-sans {isActive(item.href) ? 'text-accent-gold border-b border-accent-gold' : 'text-slate-600'}"
 								aria-current={isActive(item.href) ? 'page' : undefined}
 							>
 								{item.label}
@@ -100,28 +77,22 @@
 				</ul>
 			</nav>
 
-			<!-- Right Section: Desktop CTAs -->
-			<div class="hidden lg:flex items-center gap-6">
+			<!-- Right Section: Desktop Portal Login (Outlined academic style) -->
+			<div class="hidden md:flex items-center">
 				<a
 					href={loginHref}
-					class="text-[15px] font-semibold text-primary-blue hover:text-primary-blue/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue focus-visible:ring-offset-2 rounded-md px-2 py-1 font-sans"
+					class="inline-flex items-center justify-center border border-slate-300 hover:border-slate-800 text-[13px] font-semibold text-slate-800 px-6 py-2 rounded-md hover:bg-slate-900 hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold focus-visible:ring-offset-2 font-sans"
 				>
-					Login
-				</a>
-				<a
-					href={ctaHref}
-					class="inline-flex items-center justify-center bg-accent-yellow text-primary-blue font-bold text-[15px] px-6 py-2.5 rounded-lg hover:bg-accent-yellow/95 hover:shadow-md hover:shadow-accent-yellow/20 active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue focus-visible:ring-offset-2 font-sans"
-				>
-					{ctaText}
+					Portal Login
 				</a>
 			</div>
 
 			<!-- Mobile Menu Button (Hamburger) -->
-			<div class="flex lg:hidden items-center">
+			<div class="flex md:hidden items-center">
 				<button
 					onclick={toggleMenu}
 					type="button"
-					class="relative flex flex-col justify-center items-center w-10 h-10 rounded-lg text-primary-blue hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue"
+					class="relative flex flex-col justify-center items-center w-10 h-10 rounded-lg text-slate-800 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold"
 					aria-label={isOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={isOpen}
 					aria-controls="mobile-menu"
@@ -140,18 +111,18 @@
 	<!-- Mobile Dropdown Menu -->
 	{#if isOpen}
 		<div
-			transition:slide={{ duration: 250 }}
-			class="lg:hidden border-t border-border-gray bg-white shadow-lg overflow-hidden"
+			transition:slide={{ duration: 200 }}
+			class="md:hidden border-t border-border-gray bg-bg-warm shadow-md overflow-hidden"
 			id="mobile-menu"
 		>
-			<nav class="px-4 py-5 space-y-4" aria-label="Mobile Navigation">
+			<nav class="px-6 py-5 space-y-4" aria-label="Mobile Navigation">
 				<ul class="space-y-1">
 					{#each navItems as item}
 						<li>
 							<a
 								href={item.href}
 								onclick={closeMenu}
-								class="block w-full px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 font-sans {isActive(item.href) ? 'bg-primary-blue/5 text-primary-blue' : 'text-slate-600 hover:bg-slate-50 hover:text-primary-blue'}"
+								class="block w-full px-3 py-2.5 rounded-md text-sm font-bold tracking-wider uppercase transition-all duration-200 font-sans {isActive(item.href) ? 'bg-slate-100 text-accent-gold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}"
 								aria-current={isActive(item.href) ? 'page' : undefined}
 							>
 								{item.label}
@@ -161,23 +132,16 @@
 				</ul>
 				
 				<!-- Separator -->
-				<div class="h-px bg-slate-100 my-4"></div>
+				<div class="h-px bg-slate-200 my-4"></div>
 
 				<!-- Mobile CTAs -->
-				<div class="flex flex-col gap-3 px-3 pb-2">
+				<div class="flex flex-col gap-2.5 px-3 pb-2">
 					<a
 						href={loginHref}
 						onclick={closeMenu}
-						class="flex items-center justify-center w-full py-2.5 rounded-lg text-base font-bold text-primary-blue hover:bg-slate-50 transition-colors border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue font-sans"
+						class="flex items-center justify-center w-full py-2.5 rounded-md text-sm font-semibold border border-slate-350 text-slate-800 hover:bg-slate-900 hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold font-sans"
 					>
-						Login
-					</a>
-					<a
-						href={ctaHref}
-						onclick={closeMenu}
-						class="flex items-center justify-center w-full py-2.5 rounded-lg text-base font-bold bg-accent-yellow text-primary-blue shadow-sm hover:bg-accent-yellow/95 transition-all duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue font-sans"
-					>
-						{ctaText}
+						Portal Login
 					</a>
 				</div>
 			</nav>
