@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade, slide } from "svelte/transition";
+  import ProfileSection from "./ProfileSection.svelte";
 
   // Sidebar navigation items
   const menuItems = [
@@ -225,7 +226,13 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">Welcome Back, Rahul !</h1>
+          <h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">
+            {#if currentTab === 'Profile'}
+              My Profile
+            {:else}
+              Welcome Back, Rahul !
+            {/if}
+          </h1>
           <p class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Tuesday, 23 June 2026</p>
         </div>
       </div>
@@ -688,6 +695,8 @@
           </button>
         </div>
       </section>
+      {:else if currentTab === 'Profile'}
+        <ProfileSection />
       {:else}
         <!-- Placeholder for under construction pages -->
         <div transition:fade={{ duration: 150 }} class="bg-white border border-slate-200 rounded-xl p-8 sm:p-12 text-center max-w-2xl mx-auto my-12 shadow-xs space-y-6 animate-fade-in">
