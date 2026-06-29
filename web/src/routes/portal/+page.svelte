@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import ProfileSection from './ProfileSection.svelte';
-  import BrowseActivities from "./BrowseActivities.svelte";
+	import BrowseActivities from './BrowseActivities.svelte';
 
 	// Sidebar navigation items
 	const menuItems = [
@@ -193,8 +193,8 @@
 	function triggerAction(actionName: string) {
 		if (actionName === 'Upload Certificate') {
 			isUploadModalOpen = true;
-    } else if (actionName === "Browse Activities") {
-      currentTab = "Activities";
+		} else if (actionName === 'Browse Activities') {
+			currentTab = 'Activities';
 		} else {
 			alert(`Quick Action Triggered: ${actionName}`);
 		}
@@ -428,7 +428,13 @@
 				</button>
 				<div>
 					<h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">
-						{currentTab === 'Profile' ? 'My Profile' : (currentTab === 'Dashboard' ? 'Welcome Back, Rahul!' : (currentTab === 'Activities' ? 'Browse Activities' : currentTab))}
+						{currentTab === 'Profile'
+							? 'My Profile'
+							: currentTab === 'Dashboard'
+								? 'Welcome Back, Rahul!'
+								: currentTab === 'Activities'
+									? 'Browse Activities'
+									: currentTab}
 					</h1>
 					<p
 						class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5"
@@ -1199,8 +1205,8 @@
 				</section>
 			{:else if currentTab === 'Profile'}
 				<ProfileSection />
-      {:else if currentTab === 'Activities'}
-        <BrowseActivities />
+			{:else if currentTab === 'Activities'}
+				<BrowseActivities />
 			{:else}
 				<!-- Placeholder for under construction pages -->
 				<div
