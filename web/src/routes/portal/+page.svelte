@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import ProfileSection from './ProfileSection.svelte';
+	import UploadCertificateSection from './UploadCertificateSection.svelte';
 
 	// Sidebar navigation items
 	const menuItems = [
@@ -427,6 +428,8 @@
 					<h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">
 						{#if currentTab === 'Profile'}
 							My Profile
+						{:else if currentTab === 'Upload Certificate'}
+							Upload Certificate
 						{:else}
 							Welcome Back, Rahul !
 						{/if}
@@ -1200,6 +1203,8 @@
 				</section>
 			{:else if currentTab === 'Profile'}
 				<ProfileSection />
+			{:else if currentTab === 'Upload Certificate'}
+				<UploadCertificateSection />
 			{:else}
 				<!-- Placeholder for under construction pages -->
 				<div
