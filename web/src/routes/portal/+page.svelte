@@ -2,6 +2,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import ProfileSection from './ProfileSection.svelte';
 	import MyEnrollmentsSection from './MyEnrollmentsSection.svelte';
+	import UploadCertificateSection from './UploadCertificateSection.svelte';
 
 	// Sidebar navigation items
 	const menuItems = [
@@ -430,6 +431,8 @@
 							My Profile
 						{:else if currentTab === 'My Enrollments'}
 							My Enrollments
+						{:else if currentTab === 'Upload Certificate'}
+							Upload Certificate
 						{:else}
 							Welcome Back, Rahul !
 						{/if}
@@ -1205,6 +1208,8 @@
 				<ProfileSection />
 			{:else if currentTab === 'My Enrollments'}
 				<MyEnrollmentsSection onUploadCertificateClick={() => (isUploadModalOpen = true)} />
+			{:else if currentTab === 'Upload Certificate'}
+				<UploadCertificateSection />
 			{:else}
 				<!-- Placeholder for under construction pages -->
 				<div
