@@ -1,6 +1,4 @@
 <script lang="ts">
-	
-
 	// Props using Svelte 5 runes
 	let { onUploadCertificateClick = () => {} } = $props();
 
