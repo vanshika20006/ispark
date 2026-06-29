@@ -428,14 +428,8 @@
 				</button>
 				<div>
 					<h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">
-						{#if currentTab === 'Profile'}
-							My Profile
-						{:else}
-							
-            {currentTab === 'Dashboard' ? 'Welcome Back, Rahul !
-						{/if}
-					' : currentTab === 'Activities' ? 'Browse Activities' : currentTab}
-          </h1>
+						{currentTab === 'Profile' ? 'My Profile' : (currentTab === 'Dashboard' ? 'Welcome Back, Rahul!' : (currentTab === 'Activities' ? 'Browse Activities' : currentTab))}
+					</h1>
 					<p
 						class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5"
 					>
