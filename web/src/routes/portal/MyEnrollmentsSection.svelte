@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade, slide } from 'svelte/transition';
+	
 
 	// Props using Svelte 5 runes
 	let { onUploadCertificateClick = () => {} } = $props();
