@@ -2,6 +2,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import ProfileSection from './ProfileSection.svelte';
 	import BrowseActivities from './BrowseActivities.svelte';
+	import ExtracurricularMarksheet from './ExtracurricularMarksheet.svelte';
 
 	// Sidebar navigation items
 	const menuItems = [
@@ -195,6 +196,12 @@
 			isUploadModalOpen = true;
 		} else if (actionName === 'Browse Activities') {
 			currentTab = 'Activities';
+		} else if (actionName === 'Download Marksheet') {
+			currentTab = 'Extracurricular Marksheet';
+		} else if (actionName === 'View Progress') {
+			currentTab = 'Credits & Progress';
+		} else if (actionName === 'View My Certificates') {
+			currentTab = 'My Certificates';
 		} else {
 			alert(`Quick Action Triggered: ${actionName}`);
 		}
@@ -1207,6 +1214,8 @@
 				<ProfileSection />
 			{:else if currentTab === 'Activities'}
 				<BrowseActivities />
+			{:else if currentTab === 'Extracurricular Marksheet'}
+				<ExtracurricularMarksheet />
 			{:else}
 				<!-- Placeholder for under construction pages -->
 				<div
