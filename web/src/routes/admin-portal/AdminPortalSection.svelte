@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	const formId = 'admin-login';
 
@@ -81,6 +82,9 @@
 			if (adminId === 'admin' && password === 'admin123') {
 				loginSuccess = true;
 				failedAttempts = 0;
+				setTimeout(() => {
+					goto('/admin-portal/dashboard');
+				}, 1500);
 			} else {
 				failedAttempts += 1;
 				if (failedAttempts >= 5) {
@@ -240,7 +244,7 @@
 
 				<div class="flex gap-3 w-full max-w-sm pt-4">
 					<a
-						href="/"
+						href="/admin-portal/dashboard"
 						class="flex-1 py-3 text-center bg-inst-navy hover:bg-inst-navy/90 text-white font-semibold text-xs tracking-wider uppercase rounded-xl transition duration-200"
 					>
 						Go to Console
