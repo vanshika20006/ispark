@@ -8,7 +8,7 @@
 		if (!str) return '';
 		return str.toLowerCase().replace(/\b[a-z]/g, (char) => char.toUpperCase());
 	}
-	
+
 	// Profile State
 	let profile = $state({
 		name: '',
@@ -32,8 +32,6 @@
 		lastLogin: 'Today',
 		lastPasswordChange: '-'
 	});
-
-	let loading = $state(true);
 
 	async function loadProfile() {
 		try {
@@ -59,8 +57,6 @@
 			}
 		} catch (err) {
 			console.error(err);
-		} finally {
-			loading = false;
 		}
 	}
 
