@@ -188,6 +188,20 @@
 			status: 'Inactive',
 			email: 'divya.menon@iips.edu',
 			batch: '2023'
+		},
+		{
+			id: 'S013',
+			name: 'Palak Rai',
+			regNo: 'EN2022007',
+			department: 'Computer Science',
+			semester: 6,
+			creditsEarned: 185,
+			creditsTarget: 200,
+			certificates: 2,
+			activityCount: 11,
+			status: 'Active',
+			email: 'palak.rai@iips.edu',
+			batch: '2022'
 		}
 	];
 
@@ -200,8 +214,9 @@
 	);
 
 	// Student Overview highlights
-	const topPerformer = [...allStudents].sort((a, b) => b.creditsEarned - a.creditsEarned)[0];
-	const highestCertificates = [...allStudents].sort((a, b) => b.certificates - a.certificates)[0];
+	const perfScore = (s: Student) => s.creditsEarned + s.certificates * 15 + s.activityCount * 2;
+	const topPerformer = [...allStudents].sort((a, b) => perfScore(b) - perfScore(a))[0];
+	const highestCredits = [...allStudents].sort((a, b) => b.creditsEarned - a.creditsEarned)[0];
 	const mostActive = [...allStudents].sort((a, b) => b.activityCount - a.activityCount)[0];
 	const pendingAttention = allStudents.filter(
 		(s) => s.status === 'At Risk' || s.status === 'Pending Review'
@@ -350,14 +365,6 @@
 	{/each}
 </div>
 
-<!-- ── Page Header ─────────────────────────────────────────────────────────── -->
-<div class="flex flex-col gap-1" transition:fade={{ duration: 150 }}>
-	<h1 class="text-2xl font-bold font-serif text-slate-900">Student Management</h1>
-	<p class="text-xs text-slate-400 font-semibold tracking-wide">
-		Monitor and manage student participation, credits, certificates, and activities.
-	</p>
-</div>
-
 <!-- ── Stat Cards ──────────────────────────────────────────────────────────── -->
 <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 	<!-- Total Students -->
@@ -486,140 +493,123 @@
 </section>
 
 <!-- ── Student Overview + Quick Insights ──────────────────────────────────── -->
-<section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
 	<!-- Student Overview -->
-	<div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+	<div
+		class="lg:col-span-8 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col"
+	>
 		<div class="p-5 border-b border-slate-100 bg-slate-50/20">
 			<h2 class="text-sm font-bold font-serif text-inst-navy">Student Overview</h2>
 			<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
 				Key performance profiles of enrolled students
 			</p>
 		</div>
-		<div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+		<div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow auto-rows-fr">
 			<!-- Top Performer -->
 			<div
-				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex flex-col gap-2 hover:shadow-sm transition-shadow"
+				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex items-center gap-3 hover:shadow-sm transition-shadow"
 			>
-				<div class="flex items-center gap-2 mb-1">
-					<div
-						class="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center border border-yellow-200"
+				<div
+					class="w-9 h-9 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center border border-yellow-200 shrink-0"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-4 h-4"
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							class="w-3.5 h-3.5"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-							/>
-						</svg>
-					</div>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+						/>
+					</svg>
+				</div>
+				<div class="flex flex-col gap-0.5 min-w-0">
 					<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
 						>Top Performer</span
 					>
-				</div>
-				<div class="font-bold text-sm text-slate-900">{topPerformer.name}</div>
-				<div class="text-[10px] text-slate-500 font-semibold">
-					{topPerformer.creditsEarned} credits · {topPerformer.department}
-				</div>
-				<div class="mt-1 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-					<div
-						class="h-full bg-yellow-400 rounded-full"
-						style="width: {(topPerformer.creditsEarned / topPerformer.creditsTarget) * 100}%"
-					></div>
+					<span class="font-bold text-sm text-slate-900 truncate">{topPerformer.name}</span>
+					<span class="text-[10px] text-slate-500 font-semibold">
+						{topPerformer.creditsEarned} credits · {topPerformer.department}
+					</span>
 				</div>
 			</div>
 
-			<!-- Highest Credits -->
+			<!-- Highest Credits Earned -->
 			<div
-				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex flex-col gap-2 hover:shadow-sm transition-shadow"
-			>
-				<div class="flex items-center gap-2 mb-1">
-					<div
-						class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							class="w-3.5 h-3.5"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
-							/>
-						</svg>
-					</div>
-					<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
-						>Highest Credits</span
-					>
-				</div>
-				<div class="font-bold text-sm text-slate-900">{highestCertificates.name}</div>
-				<div class="text-[10px] text-slate-500 font-semibold">
-					{highestCertificates.certificates} certs and with {highestCertificates.activityCount} acts
-				</div>
-				<div class="mt-1 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-					<div
-						class="h-full bg-emerald-400 rounded-full"
-						style="width: {(highestCertificates.creditsEarned / highestCertificates.creditsTarget) *
-							100}%"
-					></div>
-				</div>
-			</div>
-
-			<!-- Most Active -->
-			<div
-				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex flex-col gap-2 hover:shadow-sm transition-shadow"
-			>
-				<div class="flex items-center gap-2 mb-1">
-					<div
-						class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center border border-blue-200"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							class="w-3.5 h-3.5"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-							/>
-						</svg>
-					</div>
-					<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
-						>Most Active</span
-					>
-				</div>
-				<div class="font-bold text-sm text-slate-900">{mostActive.name}</div>
-				<div class="text-[10px] text-slate-500 font-semibold">
-					{mostActive.activityCount} activities logged
-				</div>
-				<div class="mt-1 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-					<div
-						class="h-full bg-blue-400 rounded-full"
-						style="width: {Math.min(100, (mostActive.activityCount / 25) * 100)}%"
-					></div>
-				</div>
-			</div>
-
-			<!-- Pending Attention row -->
-			<div
-				class="sm:col-span-3 bg-rose-50/60 border border-rose-100 rounded-xl p-4 flex items-center gap-3"
+				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex items-center gap-3 hover:shadow-sm transition-shadow"
 			>
 				<div
-					class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center border border-rose-200 shrink-0"
+					class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200 shrink-0"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-4 h-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+						/>
+					</svg>
+				</div>
+				<div class="flex flex-col gap-0.5 min-w-0">
+					<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+						>Highest Credits Earned</span
+					>
+					<span class="font-bold text-sm text-slate-900 truncate">{highestCredits.name}</span>
+					<span class="text-[10px] text-slate-500 font-semibold">
+						{highestCredits.creditsEarned} credits earned this batch
+					</span>
+				</div>
+			</div>
+
+			<!-- Most Active Student -->
+			<div
+				class="bg-slate-50 rounded-xl border border-slate-150 p-4 flex items-center gap-3 hover:shadow-sm transition-shadow"
+			>
+				<div
+					class="w-9 h-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center border border-blue-200 shrink-0"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="2"
+						stroke="currentColor"
+						class="w-4 h-4"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+						/>
+					</svg>
+				</div>
+				<div class="flex flex-col gap-0.5 min-w-0">
+					<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+						>Most Active Student</span
+					>
+					<span class="font-bold text-sm text-slate-900 truncate">{mostActive.name}</span>
+					<span class="text-[10px] text-slate-500 font-semibold">
+						{mostActive.activityCount} activities logged
+					</span>
+				</div>
+			</div>
+
+			<!-- Requiring Attention -->
+			<div
+				class="bg-rose-50/60 rounded-xl border border-rose-100 p-4 flex items-center gap-3 hover:shadow-sm transition-shadow"
+			>
+				<div
+					class="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center border border-rose-200 shrink-0"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -636,14 +626,17 @@
 						/>
 					</svg>
 				</div>
-				<div>
-					<div class="text-xs font-bold text-rose-700">{pendingAttention.length} students</div>
-					<div class="text-[10px] text-rose-500 font-semibold">
+				<div class="flex flex-col gap-0.5 min-w-0">
+					<span class="text-[9px] font-bold text-rose-400 uppercase tracking-wider"
+						>Requiring Attention</span
+					>
+					<span class="font-bold text-sm text-rose-700">{pendingAttention.length} students</span>
+					<span class="text-[10px] text-rose-500 font-semibold">
 						{pendingAttention
-							.slice(0, 3)
+							.slice(0, 4)
 							.map((s) => s.name.split(' ')[0])
-							.join(', ')} · Pending attention
-					</div>
+							.join(', ')}
+					</span>
 				</div>
 			</div>
 		</div>
