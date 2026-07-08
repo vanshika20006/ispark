@@ -208,7 +208,7 @@
 			author: 'Dr. Rajesh Kumar',
 			role: 'CSE Dept · Semester 6',
 			badge: 'Academic Advisor',
-			text: `Student actively participates in technical activities and consistently submits certificates on time. Academic performance in extracurricular domain is commendable — particularly strong engagement with NPTEL certifications and research-oriented activities. Leadership activity participation can be improved; recommend encouraging enrolment in upcoming Student Council or Workshop facilitation programmes. Overall, ${student.name.split(' ')[0]} demonstrates initiative and discipline appropriate for the Skill Building track.`
+			text: `Student actively participates in technical activities and consistently submits certificates on time. Academic performance in extracurricular domain is commendable — particularly strong engagement with NPTEL certifications and research-oriented activities. Leadership activity participation can be improved; recommend encouraging enrolment in upcoming Student Council or Workshop facilitation programmes. Overall, this student demonstrates initiative and discipline appropriate for the Skill Building track.`
 		}
 	]);
 
