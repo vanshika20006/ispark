@@ -74,9 +74,12 @@
 	function routeAfterLogin(data) {
 		loginSuccess = true;
 
+		// Persist the flag so the dashboard can guard itself against direct URL access
+		localStorage.setItem('admin_must_change_password', String(!!data.must_change_password));
+
 		setTimeout(() => {
 			if (data.must_change_password) {
-				goto('/admin-portal/change-password');
+				goto('/admin-portal/update');
 			} else {
 				goto('/admin-portal/dashboard');
 			}

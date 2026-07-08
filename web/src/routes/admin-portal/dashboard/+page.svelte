@@ -1,9 +1,23 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { fade, slide } from 'svelte/transition';
 	import AdminDashboardView from './AdminDashboardView.svelte';
 	import AdminPlaceholderView from './AdminPlaceholderView.svelte';
 	import ActivityMonitoringView from './ActivityMonitoringView.svelte';
 	import AdminStudentManagementView from './AdminStudentManagementView.svelte';
+
+	onMount(() => {
+		const token = localStorage.getItem('admin_token');
+		if (!token) {
+			goto('/admin-portal');
+			return;
+		}
+		if (localStorage.getItem('admin_must_change_password') === 'true') {
+			goto('/admin-portal/update');
+		}
+	});
+
 
 	// Sidebar menu items list for Admin Portal
 	const menuItems = [

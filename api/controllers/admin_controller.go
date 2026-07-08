@@ -46,7 +46,7 @@ func AdminLogin(c *fiber.Ctx) error {
 }
 
 // 1. POST /admin/change-password -> ChangePassword lets a logged-in admin set a new password (used for both voluntary changes and the forced first-login reset flow)
-func ChangePassword(c *fiber.Ctx) error {
+func AdminChangePassword(c *fiber.Ctx) error {
 	var input models.ChangePasswordInput
 	if err := c.BodyParser(&input); err != nil {
 		return errJSON(c, fiber.StatusBadRequest, "Cannot parse request body")
@@ -84,24 +84,4 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": "Password changed successfully"})
-}
-
-// 2. GET /api/admin/students -> View assigned students
-func GetAllStudents(c *fiber.Ctx) error {
-	var students []models.Student
-	if err := config.DB.Select("roll_no, name, course_name, semester, email_id").Find(&students).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve students"})
-	}
-	return c.JSON(fiber.Map{"students": students})
-}
-
-// 3. GET /api/admin/students/:roll -> One student's detail
-func GetStudentDetail(c *fiber.Ctx) error {
-	rollNo := c.Params("roll")
-	var student models.Student
-
-	if err := config.DB.Where("roll_no = ?", rollNo).First(&student).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Student not found"})
-	}
-	return c.JSON(fiber.Map{"student": student})
 }
