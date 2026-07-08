@@ -34,9 +34,6 @@
 	// Selected menu state
 	let currentTab = $state('Dashboard');
 	let isMobileSidebarOpen = $state(false);
-    // When user clicks "View" for a batch, the dashboard will switch to Student Management
-    // and this holds the selected batch name to filter students.
-    let selectedBatch = $state('');
 
 	// Search & Notification states
 	let isNotificationsOpen = $state(false);
@@ -402,21 +399,11 @@
 			{:else if currentTab === 'Activity Monitoring'}
 				<ActivityMonitoringView />
 			{:else if currentTab === 'Student Management'}
-				<AdminStudentManagementView batch={selectedBatch} />
+				<AdminStudentManagementView />
 			{:else if currentTab === 'Certificate Verification'}
 				<AdminCertificateVerificationView />
 			{:else if currentTab === 'Batch Analytics'}
-				<BatchAnalyticsView
-					on:viewBatch={(e) => {
-						selectedBatch = e.detail;
-						currentTab = 'Student Management';
-					}}
-					on:editBatch={(e) => {
-						// edit event is handled inside the component; we keep a lightweight log here
-						// could be replaced with toast/analytics later
-						console.info('Edited batch', e.detail);
-					}}
-				/>
+				<BatchAnalyticsView />
 			{:else}
 				<AdminPlaceholderView
 					tabName={currentTab}

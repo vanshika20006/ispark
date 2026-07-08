@@ -684,7 +684,10 @@
 
 			<div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
 				<div>
-					<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-name">
+					<label
+						class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+						for="batch-name"
+					>
 						Batch Name
 					</label>
 					<input
@@ -697,7 +700,10 @@
 
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-students">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-students"
+						>
 							Students
 						</label>
 						<input
@@ -709,7 +715,10 @@
 						/>
 					</div>
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-compliance">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-compliance"
+						>
 							Compliance %
 						</label>
 						<input
@@ -725,7 +734,10 @@
 
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-pd">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-pd"
+						>
 							PD Credits
 						</label>
 						<input
@@ -737,7 +749,10 @@
 						/>
 					</div>
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-sb">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-sb"
+						>
 							SB Credits
 						</label>
 						<input
@@ -752,7 +767,10 @@
 
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-defaulters">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-defaulters"
+						>
 							Defaulters
 						</label>
 						<input
@@ -764,7 +782,10 @@
 						/>
 					</div>
 					<div>
-						<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-pending">
+						<label
+							class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+							for="batch-pending"
+						>
 							Pending Certs
 						</label>
 						<input
@@ -778,7 +799,10 @@
 				</div>
 
 				<div>
-					<label class="text-[10px] font-bold uppercase tracking-wide text-slate-400" for="batch-status">
+					<label
+						class="text-[10px] font-bold uppercase tracking-wide text-slate-400"
+						for="batch-status"
+					>
 						Batch Status
 					</label>
 					<select

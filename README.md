@@ -1,6 +1,6 @@
 # ISPARC — IIPS Skill, Personality Advancement & Refinement Cell
 
-Official student development and academic portal of the International Institute Professional Studies (IIPS), DAVV, Indore.
+Official student development and academic portal of the International Institute of Professional Studies (IIPS), DAVV, Indore.
 
 ## Repository Architecture
 
