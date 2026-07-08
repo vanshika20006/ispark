@@ -2,6 +2,10 @@
 	import { fade, slide } from 'svelte/transition';
 	import AdminStudentDetailView from './AdminStudentDetailView.svelte';
 
+	// Optional prop to filter students by batch when navigated from Batch Analytics
+	// In Svelte 5 runes mode use $props() instead of `export let`
+	const props = $props<{ batch?: string }>();
+
 	// ── Types ──────────────────────────────────────────────────────────────────
 	type Status = 'Active' | 'At Risk' | 'Pending Review' | 'Inactive';
 
@@ -242,7 +246,9 @@
 				s.department.toLowerCase().includes(searchQuery.toLowerCase());
 			const matchStatus = filterStatus === 'All' || s.status === filterStatus;
 			const matchDept = filterDept === 'All' || s.department === filterDept;
-			return matchSearch && matchStatus && matchDept;
+			const incoming = props.batch ?? '';
+			const matchBatch = incoming === '' || s.batch === incoming;
+			return matchSearch && matchStatus && matchDept && matchBatch;
 		})
 	);
 

@@ -5,6 +5,7 @@
 	import AdminDashboardView from './AdminDashboardView.svelte';
 	import AdminPlaceholderView from './AdminPlaceholderView.svelte';
 	import ActivityMonitoringView from './ActivityMonitoringView.svelte';
+	import BatchAnalyticsView from './BatchAnalyticsView.svelte';
 	import AdminStudentManagementView from './AdminStudentManagementView.svelte';
 	import AdminCertificateVerificationView from './AdminCertificateVerificationView.svelte';
 
@@ -414,6 +415,8 @@
 				<AdminStudentManagementView />
 			{:else if currentTab === 'Certificate Verification'}
 				<AdminCertificateVerificationView />
+			{:else if currentTab === 'Batch Analytics'}
+				<BatchAnalyticsView />
 			{:else}
 				<AdminPlaceholderView
 					tabName={currentTab}
