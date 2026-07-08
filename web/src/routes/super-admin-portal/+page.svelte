@@ -63,6 +63,15 @@
 		}
 	];
 
+	// Mock Recent Users data (Step 3)
+	const recentUsers = [
+		{ name: 'Rahul Sharma', id: 'ENR024001', role: 'Student', dept: 'Computer Science', status: 'Active' },
+		{ name: 'Dr. Priya Patel', id: 'ADM024010', role: 'Admin', dept: 'Electronics & Comm.', status: 'Active' },
+		{ name: 'Arjun Desai', id: 'ENR024008', role: 'Student', dept: 'Data Science', status: 'Pending' },
+		{ name: 'Sneha Kumar', id: 'ENR024015', role: 'Student', dept: 'Mechanical Engg.', status: 'Active' },
+		{ name: 'Dr. Vikram Singh', id: 'ADM024003', role: 'Admin', dept: 'Civil Engineering', status: 'Active' }
+	];
+
 	function toggleMobileSidebar() {
 		isMobileSidebarOpen = !isMobileSidebarOpen;
 	}
@@ -452,20 +461,78 @@
 					</div>
 				</section>
 
-				<!-- Main Dashboard Placeholder for remaining steps -->
-				<div class="p-8 border border-dashed border-slate-350 bg-white rounded-xl text-center space-y-4">
-					<div class="w-12 h-12 rounded-full bg-[#881B1B]/10 text-[#881B1B] flex items-center justify-center mx-auto">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-							<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-						</svg>
+				<!-- Middle Grid section (Step 3) -->
+				<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+					<!-- User Management Overview (lg:col-span-2) -->
+					<div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+						<div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/20">
+							<h3 class="text-sm font-bold font-serif text-slate-905">User Management Overview</h3>
+							<button onclick={() => (currentTab = 'User Management')} class="text-[#881B1B] hover:underline text-xs font-bold uppercase tracking-wider">
+								View All
+							</button>
+						</div>
+						<div class="overflow-x-auto">
+							<table class="w-full text-left border-collapse">
+								<thead>
+									<tr class="border-b border-slate-150 bg-slate-50/50 text-[10px] font-extrabold text-slate-405 uppercase tracking-wider">
+										<th class="py-3.5 px-5">User Name</th>
+										<th class="py-3.5 px-5">Role</th>
+										<th class="py-3.5 px-5">Department</th>
+										<th class="py-3.5 px-5">Status</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100 text-xs font-sans">
+									{#each recentUsers as user}
+										<tr class="hover:bg-slate-50/30 transition-colors">
+											<td class="py-4 px-5">
+												<div class="flex flex-col">
+													<span class="font-bold text-slate-800">{user.name}</span>
+													<span class="text-[10px] text-slate-400 font-semibold mt-0.5 select-all">{user.id}</span>
+												</div>
+											</td>
+											<td class="py-4 px-5">
+												<span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase rounded-full border
+													{user.role === 'Student'
+														? 'bg-slate-50 text-slate-650 border-slate-200'
+														: 'bg-blue-50 text-blue-700 border-blue-100'}"
+												>
+													{user.role}
+												</span>
+											</td>
+											<td class="py-4 px-5 text-slate-500 font-semibold">{user.dept}</td>
+											<td class="py-4 px-5">
+												<span class="inline-flex items-center gap-1.5 font-bold
+													{user.status === 'Active' ? 'text-emerald-600' : 'text-amber-600'}"
+												>
+													<span class="w-1.5 h-1.5 rounded-full shrink-0
+														{user.status === 'Active' ? 'bg-emerald-600' : 'bg-amber-500 animate-pulse'}"
+													></span>
+													{user.status}
+												</span>
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 					</div>
-					<div class="space-y-1">
-						<h3 class="font-bold text-slate-800 text-sm">Dashboard Widgets Configuration Pending</h3>
-						<p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-							User Management registry table, Quick Actions panels, and Recent System Activity logs will be populated in subsequent steps.
-						</p>
+
+					<!-- Right Column placeholder: Quick Actions (Step 4 placeholder) -->
+					<div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
+						<h3 class="text-sm font-bold font-serif text-slate-905">Quick Actions</h3>
+						<div class="h-px bg-slate-100 my-2"></div>
+						<div class="p-6 border border-dashed border-slate-350 bg-slate-50/50 rounded-xl text-center text-xs text-slate-400 leading-relaxed font-semibold">
+							Quick action buttons (Create User, Create Activity, Create Track, Generate Report) will be added here in Step 4.
+						</div>
 					</div>
+				</div>
+
+				<!-- Recent System Activities Section Placeholder (Step 5 placeholder) -->
+				<div class="p-8 border border-dashed border-slate-350 bg-white rounded-xl text-center space-y-2">
+					<h3 class="font-bold text-slate-800 text-sm">System Logs & Activities Pending</h3>
+					<p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+						Super admin event logs detailing system activity logs (audit trailing, announcement tracking, and report dispatches) will be added here in Step 5.
+					</p>
 				</div>
 			{:else}
 				<!-- Under Construction placeholder for other tabs -->
