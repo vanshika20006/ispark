@@ -4,6 +4,7 @@
 	import AdminPlaceholderView from './AdminPlaceholderView.svelte';
 	import ActivityMonitoringView from './ActivityMonitoringView.svelte';
 	import AdminStudentManagementView from './AdminStudentManagementView.svelte';
+	import AdminCertificateVerificationView from './AdminCertificateVerificationView.svelte';
 
 	// Sidebar menu items list for Admin Portal
 	const menuItems = [
@@ -398,6 +399,8 @@
 				<ActivityMonitoringView />
 			{:else if currentTab === 'Student Management'}
 				<AdminStudentManagementView />
+			{:else if currentTab === 'Certificate Verification'}
+				<AdminCertificateVerificationView />
 			{:else}
 				<AdminPlaceholderView
 					tabName={currentTab}
