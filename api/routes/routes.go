@@ -28,6 +28,10 @@ func SetupRoutes(app *fiber.App) {
 	auth.Post("/logout", controllers.Logout)
 	auth.Get("/profile", controllers.GetProfile)
 
+	// Student Dashboard routes (Require login)
+	student := api.Group("/student")
+	student.Use(middleware.AuthRequired())
+	student.Get("/dashboard/stats", controllers.GetDashboardStats)
 	// Admin
 	api.Post("/admin/auth/login", controllers.AdminLogin)
 
