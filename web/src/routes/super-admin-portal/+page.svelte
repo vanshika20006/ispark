@@ -362,7 +362,7 @@
 				</button>
 				<div>
 					<h1 class="text-lg sm:text-xl font-bold text-slate-900 font-serif leading-tight">
-						{currentTab === 'Dashboard' ? 'Super Admin Console' : currentTab}
+						{currentTab === 'Dashboard' ? 'Welcome Back, Super Admin!' : currentTab}
 					</h1>
 					<p class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
 						Tuesday, 23 June 2026
@@ -465,14 +465,6 @@
 		<!-- Main Content Body -->
 		<main class="flex-grow p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto max-w-7xl mx-auto w-full">
 			{#if currentTab === 'Dashboard'}
-				<!-- Welcome Banner Section -->
-				<div class="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 shadow-xs space-y-2">
-					<h2 class="text-2xl font-bold font-serif text-[#0B1535]">Welcome Back, Super Admin!</h2>
-					<p class="text-xs text-slate-500 font-medium">
-						Academic Year 2025–26 &middot; Saturday, 27 June 2026
-					</p>
-				</div>
-				
 				<!-- Dashboard Statistics Cards Grid (Step 2) -->
 				<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Super Admin metrics overview">
 					<!-- Card 1: Total Students -->
@@ -609,68 +601,60 @@
 							<!-- Button 1: Create User (Solid Red) -->
 							<button
 								onclick={() => (isCreateUserModalOpen = true)}
-								class="p-4 bg-[#881B1B] hover:bg-[#881B1B]/95 text-white rounded-xl shadow-xs text-left space-y-3 transition duration-200 focus:outline-none flex flex-col justify-between h-[110px]"
+								class="p-5 bg-[#C23A3A] hover:bg-[#B03131] text-white rounded-[20px] shadow-xs flex flex-col items-center justify-center text-center space-y-2.5 h-[160px] w-full transition duration-200 focus:outline-none"
 							>
-								<div class="p-2 bg-white/10 rounded-lg w-fit">
-									<!-- User plus icon -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235A8.902 8.902 0 0110 18a8.902 8.902 0 016 1.235c.19.115.3.322.3.54v.725c0 .19-.153.344-.344.344H4.344A.344.344 0 014 20.5v-.725c0-.218.11-.425.3-.54z" />
-									</svg>
-								</div>
-								<div>
-									<div class="font-extrabold text-xs block font-sans">Create User</div>
-									<div class="text-[9px] text-white/70 font-semibold block mt-0.5 font-sans leading-tight">Add student or mentor</div>
+								<!-- User plus icon -->
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-white">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235A8.902 8.902 0 0110 18a8.902 8.902 0 016 1.235c.19.115.3.322.3.54v.725c0 .19-.153.344-.344.344H4.344A.344.344 0 014 20.5v-.725c0-.218.11-.425.3-.54z" />
+								</svg>
+								<div class="space-y-1">
+									<span class="font-extrabold text-xs block font-sans">Create User</span>
+									<span class="text-[9px] text-white/80 font-medium block font-sans leading-tight">Add student or mentor</span>
 								</div>
 							</button>
 
 							<!-- Button 2: Create Activity -->
 							<button
 								onclick={() => (isCreateActivityModalOpen = true)}
-								class="p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl text-left space-y-3 transition duration-200 focus:outline-none flex flex-col justify-between h-[110px]"
+								class="p-5 bg-[#EFECE9] hover:bg-[#E4DFDB] text-slate-800 rounded-[20px] flex flex-col items-center justify-center text-center space-y-2.5 h-[160px] w-full transition duration-200 focus:outline-none"
 							>
-								<div class="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit border border-blue-100">
-									<!-- Activity graph icon -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
-									</svg>
-								</div>
-								<div>
-									<div class="font-extrabold text-xs text-slate-800 block font-sans">Create Activity</div>
-									<div class="text-[9px] text-slate-400 font-semibold block mt-0.5 font-sans leading-tight">Publish new activity</div>
+								<!-- Activity graph icon -->
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-slate-700">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+								</svg>
+								<div class="space-y-1">
+									<span class="font-extrabold text-xs block font-sans text-slate-905">Create Activity</span>
+									<span class="text-[9px] text-slate-500 font-semibold block font-sans leading-tight">Publish new activity</span>
 								</div>
 							</button>
 
 							<!-- Button 3: Create Track -->
 							<button
 								onclick={() => (isCreateTrackModalOpen = true)}
-								class="p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl text-left space-y-3 transition duration-200 focus:outline-none flex flex-col justify-between h-[110px]"
+								class="p-5 bg-[#EFECE9] hover:bg-[#E4DFDB] text-slate-800 rounded-[20px] flex flex-col items-center justify-center text-center space-y-2.5 h-[160px] w-full transition duration-200 focus:outline-none"
 							>
-								<div class="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit border border-blue-100">
-									<!-- Track icon -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L21.75 12l-4.179 2.25m0 0L21.75 16.5l-9.75 5.25-9.75-5.25L6.429 14.25m11.142 0L12 16.5m0-13.5L21.75 7.5 12 12.75 2.25 7.5 12 3z" />
-									</svg>
-								</div>
-								<div>
-									<div class="font-extrabold text-xs text-slate-800 block font-sans">Create Track</div>
-									<div class="text-[9px] text-slate-400 font-semibold block mt-0.5 font-sans leading-tight">Set up a new track</div>
+								<!-- Track icon -->
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-slate-700">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L21.75 12l-4.179 2.25m0 0L21.75 16.5l-9.75 5.25-9.75-5.25L6.429 14.25m11.142 0L12 16.5m0-13.5L21.75 7.5 12 12.75 2.25 7.5 12 3z" />
+								</svg>
+								<div class="space-y-1">
+									<span class="font-extrabold text-xs block font-sans text-slate-905">Create Track</span>
+									<span class="text-[9px] text-slate-500 font-semibold block font-sans leading-tight">Set up a new track</span>
 								</div>
 							</button>
 
 							<!-- Button 4: Generate Report -->
 							<button
 								onclick={() => (isGenerateReportModalOpen = true)}
-								class="p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl text-left space-y-3 transition duration-200 focus:outline-none flex flex-col justify-between h-[110px]"
+								class="p-5 bg-[#EFECE9] hover:bg-[#E4DFDB] text-slate-800 rounded-[20px] flex flex-col items-center justify-center text-center space-y-2.5 h-[160px] w-full transition duration-200 focus:outline-none"
 							>
-								<div class="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit border border-blue-100">
-									<!-- Document download icon -->
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-									</svg>
-								</div>
-								<div>
-									<div class="font-extrabold text-xs text-slate-800 block font-sans">Generate Report</div>
-									<div class="text-[9px] text-slate-400 font-semibold block mt-0.5 font-sans leading-tight">Download activity data</div>
+								<!-- Document download icon -->
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-slate-700">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+								</svg>
+								<div class="space-y-1">
+									<span class="font-extrabold text-xs block font-sans text-slate-905">Generate Report</span>
+									<span class="text-[9px] text-slate-500 font-semibold block font-sans leading-tight">Download activity data</span>
 								</div>
 							</button>
 						</div>
