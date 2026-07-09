@@ -1946,15 +1946,6 @@
 				</div>
 			{:else if currentTab === 'System Settings'}
 				<!-- System Settings (Step 7) -->
-				<!-- Page heading -->
-				<div class="select-none">
-					<h2 class="text-2xl font-bold font-serif text-slate-905">System Settings</h2>
-					<p class="text-xs text-slate-500 font-semibold mt-1">
-						Configure and manage platform-wide settings, academic policies, credit requirements, and
-						platform preferences.
-					</p>
-				</div>
-
 				<!-- Overview Stat Cards -->
 				<section
 					class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none"
