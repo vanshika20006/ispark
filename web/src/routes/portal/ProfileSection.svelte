@@ -204,16 +204,17 @@
 	// Complete profile automatically / quick fix
 	async function handleCompleteProfile() {
 		try {
-			const newDob = profile.dob === '-' ? '2004-10-15' : profile.dob;
+			const body: { dob?: string } = {};
+			if (profile.dob !== '-') {
+				body.dob = profile.dob;
+			}
 			const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`
 				},
-				body: JSON.stringify({
-					dob: newDob
-				})
+				body: JSON.stringify(body)
 			});
 
 			if (res.ok) {
