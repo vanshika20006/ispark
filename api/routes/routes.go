@@ -44,4 +44,7 @@ func SetupRoutes(app *fiber.App) {
 	// Must change the password
 	admin.Post("/change-password", controllers.AdminChangePassword)
 
+	admin.Get("/students", controllers.GetAllStudents)
+	admin.Get("/students/:roll", controllers.GetStudentDetail)
+
 }

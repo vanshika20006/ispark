@@ -85,3 +85,69 @@ func AdminChangePassword(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "Password changed successfully"})
 }
+
+// 2. GET /api/admin/students -> View assigned students
+func GetAllStudents(c *fiber.Ctx) error {
+	// 1. Get token from header
+	authHeader := c.Get("Authorization")
+	if len(authHeader) < 8 {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	tokenString := authHeader[7:]
+
+	// 2. Use your premade utility
+	claims, err := utils.ValidateAccessToken(tokenString)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Invalid token"})
+	}
+
+	// 3. Find the admin/mentor
+	var currentUser models.Admin
+	if err := config.DB.Where("admin_id = ?", claims.RollNo).First(&currentUser).Error; err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "User not found"})
+	}
+
+	// 4. Build query with security filter
+	query := config.DB.Model(&models.Student{}).Select("roll_no, name, course_name, semester, email_id")
+
+	if currentUser.Role == "mentor" {
+		query = query.Where("course_name = ?", currentUser.AssignedBatch)
+	}
+
+	var students []models.Student
+	if err := query.Find(&students).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to retrieve students"})
+	}
+
+	return c.JSON(fiber.Map{"students": students})
+}
+
+// 3. GET /api/admin/students/:roll -> One student's detail
+func GetStudentDetail(c *fiber.Ctx) error {
+	roll := c.Params("roll")
+	authHeader := c.Get("Authorization")
+	tokenString := authHeader[7:]
+
+	claims, err := utils.ValidateAccessToken(tokenString)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "Invalid token"})
+	}
+
+	var currentUser models.Admin
+	config.DB.Where("admin_id = ?", claims.RollNo).First(&currentUser)
+
+	// Build query
+	query := config.DB.Preload("Activities").Preload("Certificates").Where("roll_no = ?", roll)
+
+	// Filter by batch if mentor
+	if currentUser.Role == "mentor" {
+		query = query.Where("course_name = ?", currentUser.AssignedBatch)
+	}
+
+	var student models.Student
+	if err := query.First(&student).Error; err != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "Student not found"})
+	}
+
+	return c.JSON(fiber.Map{"student": student})
+}

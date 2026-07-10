@@ -19,4 +19,6 @@ type Student struct {
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	Certificates []Certificate  `gorm:"foreignKey:StudentRollNo" json:"certificates"`
+	Activities   []Activity     `gorm:"foreignKey:StudentRollNo" json:"activities"`
 }

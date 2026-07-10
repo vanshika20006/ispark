@@ -23,8 +23,9 @@ func main() {
 	// Initialize Database
 	config.ConnectDB()
 
-	// Used to check admin login via seeding dummy data
+	// Used to check admin features via seeding dummy data
 	config.SeedDefaultAdmin()
+	config.SeedDefaultStudents()
 
 	// Initialize Fiber App
 	app := fiber.New(fiber.Config{

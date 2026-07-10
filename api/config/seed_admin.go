@@ -16,6 +16,7 @@ func SeedDefaultAdmin() {
 		Email:              "admin@isparc.dev",
 		Password:           hashed,
 		Role:               "admin",
+		AssignedBatch:      "IT2K24",
 		MustChangePassword: true,
 	}
 
