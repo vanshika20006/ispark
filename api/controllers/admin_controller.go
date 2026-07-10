@@ -88,35 +88,39 @@ func AdminChangePassword(c *fiber.Ctx) error {
 
 // 2. GET /api/admin/students -> View assigned students
 func GetAllStudents(c *fiber.Ctx) error {
-	// 1. Get token from header
+	// Get token
 	authHeader := c.Get("Authorization")
 	if len(authHeader) < 8 {
 		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 	tokenString := authHeader[7:]
 
-	// 2. Use your premade utility
+	// Validate token
 	claims, err := utils.ValidateAccessToken(tokenString)
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"error": "Invalid token"})
 	}
 
-	// 3. Find the admin/mentor
+	// Get current admin
 	var currentUser models.Admin
 	if err := config.DB.Where("admin_id = ?", claims.RollNo).First(&currentUser).Error; err != nil {
 		return c.Status(401).JSON(fiber.Map{"error": "User not found"})
 	}
 
-	// 4. Build query with security filter
-	query := config.DB.Model(&models.Student{}).Select("roll_no, name, course_name, semester, email_id")
+	// Build query
+	query := config.DB.Model(&models.Student{}).
+		Select("roll_no, name, course_name, semester, email_id")
 
-	if currentUser.Role == "mentor" {
-		query = query.Where("course_name = ?", currentUser.AssignedBatch)
+	// Restrict admin to assigned batch
+	if currentUser.Role == "admin" {
+		query = query.Where("roll_no LIKE ?", currentUser.AssignedBatch+"%")
 	}
 
 	var students []models.Student
 	if err := query.Find(&students).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to retrieve students"})
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
 	return c.JSON(fiber.Map{"students": students})
@@ -125,23 +129,34 @@ func GetAllStudents(c *fiber.Ctx) error {
 // 3. GET /api/admin/students/:roll -> One student's detail
 func GetStudentDetail(c *fiber.Ctx) error {
 	roll := c.Params("roll")
+
+	// Get token
 	authHeader := c.Get("Authorization")
+	if len(authHeader) < 8 {
+		return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+	}
 	tokenString := authHeader[7:]
 
+	// Validate token
 	claims, err := utils.ValidateAccessToken(tokenString)
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{"error": "Invalid token"})
 	}
 
+	// Get current admin
 	var currentUser models.Admin
-	config.DB.Where("admin_id = ?", claims.RollNo).First(&currentUser)
+	if err := config.DB.Where("admin_id = ?", claims.RollNo).First(&currentUser).Error; err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": "User not found"})
+	}
 
 	// Build query
-	query := config.DB.Preload("Activities").Preload("Certificates").Where("roll_no = ?", roll)
+	query := config.DB.Preload("Activities").
+		Preload("Certificates").
+		Where("roll_no = ?", roll)
 
-	// Filter by batch if mentor
-	if currentUser.Role == "mentor" {
-		query = query.Where("course_name = ?", currentUser.AssignedBatch)
+	// Restrict admin to assigned batch
+	if currentUser.Role == "admin" {
+		query = query.Where("roll_no LIKE ?", currentUser.AssignedBatch+"%")
 	}
 
 	var student models.Student
