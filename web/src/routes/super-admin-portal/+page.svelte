@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
+	import ActivityManagementView from './ActivityManagementView.svelte';
 
 	// Sidebar menu items list for Super Admin Portal
 	const menuItems = [
@@ -1697,6 +1698,8 @@
 						<span>Showing {recentLogs.length} of {recentLogs.length} recent system activities</span>
 					</div>
 				</section>
+			{:else if currentTab === 'Activity Management'}
+				<ActivityManagementView />
 			{:else if currentTab === 'User Management'}
 				<!-- User Statistics Cards Grid (Step 2) -->
 				<section
