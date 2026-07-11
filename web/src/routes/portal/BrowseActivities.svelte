@@ -10,6 +10,7 @@
 		credits: number;
 		mode: string;
 		regDeadline: string;
+		regDeadlineRaw: string;
 		activityDate: string;
 		venue: string;
 		coordinator: string;
@@ -75,6 +76,7 @@
 					credits: item.credits,
 					mode: item.mode,
 					regDeadline: formatDate(item.reg_deadline),
+					regDeadlineRaw: item.reg_deadline,
 					activityDate: formatDate(item.activity_date),
 					venue: item.venue,
 					coordinator: item.coordinator,
@@ -117,36 +119,93 @@
 	let pendingCount = $derived(stats.pending_certificates);
 	let completedCount = $derived(stats.activities_participated);
 
-	// Right sidebar registration deadlines data
-	const deadlines = [
-		{ name: 'Hackathon 2026', days: '3d left', color: 'bg-rose-50 text-rose-700 border-rose-100' },
-		{
-			name: 'Debate Championship',
-			days: '5d left',
-			color: 'bg-amber-50 text-amber-700 border-amber-100'
-		},
-		{
-			name: 'Athletics Meet',
-			days: '7d left',
-			color: 'bg-emerald-50 text-emerald-700 border-emerald-100'
-		},
-		{
-			name: 'Blood Donation Camp',
-			days: '9d left',
-			color: 'bg-blue-50 text-blue-700 border-blue-100'
-		}
-	];
+	// Dynamic registration deadlines (Open / Closing Soon activities sorted by deadline)
+	let deadlines = $derived.by(() => {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
 
-	// Right sidebar categories counts
-	const categoriesCounts = [
-		{ name: 'Technical', count: 8, dotColor: 'bg-blue-600' },
-		{ name: 'Research', count: 5, dotColor: 'bg-purple-600' },
-		{ name: 'Sports', count: 6, dotColor: 'bg-emerald-600' },
-		{ name: 'Cultural', count: 4, dotColor: 'bg-pink-600' },
-		{ name: 'Leadership', count: 3, dotColor: 'bg-teal-600' },
-		{ name: 'Social Service', count: 4, dotColor: 'bg-rose-600' },
-		{ name: 'Public Speaking', count: 4, dotColor: 'bg-amber-600' }
-	];
+		return allActivities
+			.filter((a) => a.status === 'Open' || a.status === 'Closing Soon')
+			.map((a) => {
+				const deadlineDate = new Date(a.regDeadlineRaw);
+				deadlineDate.setHours(0, 0, 0, 0);
+				const diffTime = deadlineDate.getTime() - today.getTime();
+				const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+				let daysStr = '';
+				let colorClass = 'bg-slate-50 text-slate-700 border-slate-100';
+
+				if (diffDays < 0) {
+					daysStr = 'Closed';
+				} else if (diffDays === 0) {
+					daysStr = 'Today';
+					colorClass = 'bg-rose-50 text-rose-700 border-rose-100';
+				} else {
+					daysStr = `${diffDays}d left`;
+					if (diffDays <= 3) {
+						colorClass = 'bg-rose-50 text-rose-700 border-rose-100';
+					} else if (diffDays <= 7) {
+						colorClass = 'bg-amber-50 text-amber-700 border-amber-100';
+					} else {
+						colorClass = 'bg-emerald-50 text-emerald-700 border-emerald-100';
+					}
+				}
+
+				return {
+					name: a.name,
+					days: daysStr,
+					color: colorClass,
+					rawDays: diffDays
+				};
+			})
+			.filter((a) => a.rawDays >= 0)
+			.sort((a, b) => a.rawDays - b.rawDays)
+			.slice(0, 4);
+	});
+
+	// Categories dot color mappings
+	const categoryColors: Record<string, string> = {
+		TECHNICAL: 'bg-blue-600',
+		RESEARCH: 'bg-purple-600',
+		SPORTS: 'bg-emerald-600',
+		CULTURAL: 'bg-pink-600',
+		LEADERSHIP: 'bg-teal-600',
+		'SOCIAL SERVICE': 'bg-rose-600',
+		'PUBLIC SPEAKING': 'bg-amber-600'
+	};
+
+	// Dynamic category counts from allActivities
+	let categoriesCounts = $derived.by(() => {
+		const counts: Record<string, number> = {};
+		allActivities.forEach((a) => {
+			const catUpper = a.category.toUpperCase();
+			counts[catUpper] = (counts[catUpper] || 0) + 1;
+		});
+
+		const order = [
+			'TECHNICAL',
+			'RESEARCH',
+			'SPORTS',
+			'CULTURAL',
+			'LEADERSHIP',
+			'SOCIAL SERVICE',
+			'PUBLIC SPEAKING'
+		];
+		const extra = Object.keys(counts).filter((c) => !order.includes(c));
+		const finalOrder = [...order, ...extra];
+
+		return finalOrder.map((catUpper) => {
+			const name = catUpper
+				.split(' ')
+				.map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+				.join(' ');
+			return {
+				name,
+				count: counts[catUpper] || 0,
+				dotColor: categoryColors[catUpper] || 'bg-slate-600'
+			};
+		});
+	});
 
 	// Filters State
 	let showFilters = $state(true);
