@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { fade, slide } from 'svelte/transition';
+	import { API_BASE_URL } from '$lib/config';
 	import AdminDashboardView from './AdminDashboardView.svelte';
 	import AdminPlaceholderView from './AdminPlaceholderView.svelte';
 	import ActivityMonitoringView from './ActivityMonitoringView.svelte';
@@ -9,7 +10,21 @@
 	import AdminStudentManagementView from './AdminStudentManagementView.svelte';
 	import AdminCertificateVerificationView from './AdminCertificateVerificationView.svelte';
 
-	onMount(() => {
+	interface AdminProfile {
+		admin_id: string;
+		name: string;
+		email: string;
+		role: string;
+		assigned_batch: string;
+		created_at: string;
+		updated_at: string;
+	}
+
+	let admin = $state<AdminProfile | null>(null);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+
+	onMount(async () => {
 		const token = localStorage.getItem('admin_token');
 		if (!token) {
 			goto('/admin-portal');
@@ -17,8 +32,47 @@
 		}
 		if (localStorage.getItem('admin_must_change_password') === 'true') {
 			goto('/admin-portal/update');
+			return;
+		}
+
+		try {
+			const response = await fetch(`${API_BASE_URL}/api/admin/profile`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || 'Failed to fetch admin profile');
+			}
+
+			const data = await response.json();
+			admin = data.admin;
+		} catch (err) {
+			console.error(err);
+			error = err instanceof Error ? err.message : 'An error occurred';
+		} finally {
+			loading = false;
 		}
 	});
+
+	function getInitials(name: string): string {
+		if (!name) return 'A';
+		const parts = name.split(' ').filter((part) => {
+			const lower = part.toLowerCase();
+			return (
+				lower !== 'dr.' &&
+				lower !== 'prof.' &&
+				lower !== 'mr.' &&
+				lower !== 'ms.' &&
+				lower !== 'mrs.'
+			);
+		});
+		if (parts.length === 0) return 'A';
+		if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	}
 
 	// Sidebar menu items list for Admin Portal
 	const menuItems = [
@@ -393,13 +447,19 @@
 					<div
 						class="w-10 h-10 rounded-full bg-[#881B1B] text-white flex items-center justify-center font-bold text-sm border-2 border-white shadow-sm shrink-0 font-serif"
 					>
-						RK
+						{admin ? getInitials(admin.name) : 'A'}
 					</div>
 					<div class="hidden sm:flex flex-col">
-						<span class="text-xs font-bold text-slate-900 leading-none">Dr. Rajesh Kumar</span>
-						<span class="text-[9px] text-slate-400 font-bold tracking-wider block mt-1 uppercase"
-							>Dept. of Computer Science</span
-						>
+						<span class="text-xs font-bold text-slate-900 leading-none">
+							{loading ? 'Loading...' : error ? 'Error loading' : admin?.name || 'Administrator'}
+						</span>
+						<span class="text-[9px] text-slate-400 font-bold tracking-wider block mt-1 uppercase">
+							{admin
+								? admin.role === 'superadmin'
+									? 'Super Administrator'
+									: 'Batch Coordinator - ' + admin.assigned_batch
+								: 'Coordinator'}
+						</span>
 					</div>
 				</div>
 			</div>
