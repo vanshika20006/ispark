@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DevCredentials from '$lib/DevCredentials.svelte';
 	import { goto } from '$app/navigation';
 	import { onDestroy } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -426,6 +427,7 @@
 					{/if}
 				</button>
 			</form>
+			<DevCredentials portal="admin" />
 		{/if}
 	</main>
 </section>

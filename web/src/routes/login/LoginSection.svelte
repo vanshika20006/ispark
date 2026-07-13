@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DevCredentials from '$lib/DevCredentials.svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { API_BASE_URL } from '$lib/config';
@@ -1071,6 +1072,7 @@
 					</div>
 				</div>
 			</form>
+			<DevCredentials portal="student" />
 		{/if}
 	</main>
 </section>

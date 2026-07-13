@@ -25,6 +25,8 @@ services:
       - DB_NAME=isparc
       - DB_SSLMODE=disable
       - SEED_DEV_DATA=${SEED_DEV_DATA:-true}
+    volumes:
+      - api_uploads:/root/uploads
     restart: unless-stopped
     depends_on:
       - db
@@ -55,3 +57,4 @@ services:
 
 volumes:
   pgdata:
+  api_uploads:
