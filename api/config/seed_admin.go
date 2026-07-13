@@ -18,3 +18,21 @@ func SeedDefaultAdmin() {
 		log.Printf("Seed admin failed: %v", err)
 	}
 }
+
+// SeedDefaultSuperAdmin creates the demo super admin. A super admin has no
+// assigned batch: it is not scoped to one, and sees the whole platform.
+func SeedDefaultSuperAdmin() {
+	hashed, err := utils.HashPassword("superadmin123")
+	if err != nil {
+		log.Printf("Seed super admin failed: %v", err)
+		return
+	}
+
+	var superAdmin models.Admin
+	if err := DB.Where(models.Admin{AdminID: "superadmin"}).
+		Attrs(models.Admin{Password: hashed}).
+		Assign(models.Admin{Name: "Platform Super Admin", Email: "superadmin@isparc.dev", Role: "superadmin"}).
+		FirstOrCreate(&superAdmin).Error; err != nil {
+		log.Printf("Seed super admin failed: %v", err)
+	}
+}

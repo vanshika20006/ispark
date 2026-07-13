@@ -14,5 +14,6 @@ func SeedDevData() {
 	}
 
 	SeedDefaultAdmin()
+	SeedDefaultSuperAdmin()
 	SeedDefaultStudents()
 }

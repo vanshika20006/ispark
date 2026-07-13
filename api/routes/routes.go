@@ -48,14 +48,22 @@ func SetupRoutes(app *fiber.App) {
 
 	admin := api.Group("/admin")
 
-	// Must be logged in AND have the "admin" role
+	// Must be logged in AND hold an administrative role. A super admin is not
+	// batch-scoped, so it sees every student.
 	admin.Use(middleware.AuthRequired())
-	admin.Use(middleware.RoleRequired("admin"))
+	admin.Use(middleware.RoleRequired("admin", "superadmin"))
 
 	// Must change the password
 	admin.Post("/change-password", controllers.AdminChangePassword)
 
 	admin.Get("/students", controllers.GetAllStudents)
 	admin.Get("/students/:roll", controllers.GetStudentDetail)
+
+	// Platform-wide routes, super admin only
+	platform := admin.Group("/platform", middleware.RoleRequired("superadmin"))
+	platform.Get("/stats", controllers.GetPlatformStats)
+	platform.Get("/users", controllers.GetPlatformUsers)
+	platform.Post("/users", controllers.CreatePlatformUser)
+	platform.Delete("/users/:id", controllers.DeletePlatformUser)
 
 }

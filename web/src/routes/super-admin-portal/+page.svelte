@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { API_BASE_URL } from '$lib/config';
 
 	// Local interactive states using Svelte 5 runes
 	let superAdminId = $state('');
 	let password = $state('');
 	let rememberMe = $state(false);
 	let showPassword = $state(false);
+	let submitting = $state(false);
+	let errorMsg = $state('');
+
+	const isFormValid = $derived(superAdminId.trim() !== '' && password !== '');
 
 	// Feature list items for left column
 	const features = [
@@ -40,10 +45,39 @@
 
 	const currentYear = new Date().getFullYear();
 
-	function handleLogin(event: SubmitEvent) {
+	async function handleLogin(event: SubmitEvent) {
 		event.preventDefault();
-		// Redirect to dashboard url upon submission
-		goto('/super-admin-portal/dashboard');
+		if (!isFormValid || submitting) return;
+
+		submitting = true;
+		errorMsg = '';
+
+		try {
+			const response = await fetch(`${API_BASE_URL}/api/admin/auth/login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ admin_id: superAdminId, password })
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || 'Invalid Super Admin ID or Password.');
+			}
+
+			// The login endpoint is shared with the admin portal, so an ordinary
+			// admin must not be let through to the super admin portal.
+			if (data.admin?.role !== 'superadmin') {
+				throw new Error('This account does not have super admin access.');
+			}
+
+			localStorage.setItem('superadmin_token', data.access_token);
+			await goto('/super-admin-portal/dashboard');
+		} catch (err) {
+			errorMsg = err instanceof Error ? err.message : 'Login failed. Please try again.';
+		} finally {
+			submitting = false;
+		}
 	}
 </script>
 
@@ -368,12 +402,23 @@
 							</a>
 						</div>
 
+						<!-- Error message -->
+						{#if errorMsg}
+							<div
+								class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-700"
+								role="alert"
+							>
+								{errorMsg}
+							</div>
+						{/if}
+
 						<!-- Submit Button -->
 						<button
 							type="submit"
-							class="w-full py-3 bg-[#0B1535] hover:bg-[#132049] text-white font-bold text-xs tracking-widest uppercase rounded-lg transition-colors duration-200 shadow-sm mt-3"
+							disabled={!isFormValid || submitting}
+							class="w-full py-3 bg-[#0B1535] hover:bg-[#132049] text-white font-bold text-xs tracking-widest uppercase rounded-lg transition-colors duration-200 shadow-sm mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							LOGIN
+							{submitting ? 'SIGNING IN…' : 'LOGIN'}
 						</button>
 
 						<!-- Security Notice Box -->

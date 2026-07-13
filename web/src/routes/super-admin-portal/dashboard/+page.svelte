@@ -1,7 +1,102 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { API_BASE_URL } from '$lib/config';
 	import ActivityManagementView from '../ActivityManagementView.svelte';
 	import TrackManagementView from '../TrackManagementView.svelte';
+
+	// ── Platform data (loaded from the API) ────────────────────────────────────
+	interface PlatformUser {
+		name: string;
+		id: string;
+		role: string;
+		displayRole: string;
+		dept: string;
+		status: string;
+		avatarBg: string;
+	}
+
+	interface PlatformStats {
+		total_students: number;
+		total_admins: number;
+		total_users: number;
+		total_activities: number;
+		total_certificates: number;
+		pending_certificates: number;
+		active_tracks: number;
+	}
+
+	const avatarPalette = [
+		'bg-[#802D2D] text-white',
+		'bg-[#2A4D69] text-white',
+		'bg-[#7D4427] text-white',
+		'bg-[#244E3F] text-white',
+		'bg-[#3C4A8E] text-white',
+		'bg-[#6B5E33] text-white'
+	];
+
+	let stats = $state<PlatformStats>({
+		total_students: 0,
+		total_admins: 0,
+		total_users: 0,
+		total_activities: 0,
+		total_certificates: 0,
+		pending_certificates: 0,
+		active_tracks: 0
+	});
+	let loadError = $state('');
+
+	function authHeaders(): Record<string, string> {
+		return { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` };
+	}
+
+	async function loadPlatformData() {
+		try {
+			const [statsRes, usersRes] = await Promise.all([
+				fetch(`${API_BASE_URL}/api/admin/platform/stats`, { headers: authHeaders() }),
+				fetch(`${API_BASE_URL}/api/admin/platform/users`, { headers: authHeaders() })
+			]);
+
+			if (statsRes.status === 401 || usersRes.status === 401) {
+				localStorage.removeItem('superadmin_token');
+				await goto('/super-admin-portal');
+				return;
+			}
+
+			if (!statsRes.ok || !usersRes.ok) {
+				throw new Error('Failed to load platform data');
+			}
+
+			stats = await statsRes.json();
+
+			const { users } = await usersRes.json();
+			userRegistry = users.map(
+				(
+					user: { name: string; id: string; role: string; dept: string; status: string },
+					i: number
+				) => ({
+					...user,
+					displayRole: user.role,
+					avatarBg: avatarPalette[i % avatarPalette.length]
+				})
+			);
+			loadError = '';
+		} catch {
+			loadError = 'Could not load platform data. Please try again.';
+		}
+	}
+
+	onMount(async () => {
+		// The dashboard is reachable by URL, so it must not render for a visitor
+		// who never signed in.
+		if (!localStorage.getItem('superadmin_token')) {
+			await goto('/super-admin-portal');
+			return;
+		}
+
+		await loadPlatformData();
+	});
 
 	// Sidebar menu items list for Super Admin Portal
 	const menuItems = [
@@ -65,156 +160,10 @@
 		}
 	];
 
-	// Mock Recent Users data (Step 3) - using Svelte 5 reactive states
-	let recentUsers = $state([
-		{
-			name: 'Rahul Sharma',
-			id: 'ENR024001',
-			role: 'Student',
-			dept: 'Computer Science',
-			status: 'Active'
-		},
-		{
-			name: 'Dr. Priya Patel',
-			id: 'ADM024010',
-			role: 'Admin',
-			dept: 'Electronics & Comm.',
-			status: 'Active'
-		},
-		{
-			name: 'Arjun Desai',
-			id: 'ENR024008',
-			role: 'Student',
-			dept: 'Data Science',
-			status: 'Pending'
-		},
-		{
-			name: 'Sneha Kumar',
-			id: 'ENR024015',
-			role: 'Student',
-			dept: 'Mechanical Engg.',
-			status: 'Active'
-		},
-		{
-			name: 'Dr. Vikram Singh',
-			id: 'ADM024003',
-			role: 'Admin',
-			dept: 'Civil Engineering',
-			status: 'Active'
-		}
-	]);
-
-	// Mock User Registry for User Management Portal (Step 3 & 4)
-	let userRegistry = $state([
-		{
-			name: 'Rahul Sharma',
-			id: 'ENG024001',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'Mtech CS',
-			status: 'Active',
-			avatarBg: 'bg-[#802D2D] text-white'
-		},
-		{
-			name: 'Dr. Priya Patel',
-			id: 'MNT024001',
-			role: 'Admin',
-			displayRole: 'Mentor',
-			dept: 'Mtech IT',
-			status: 'Active',
-			avatarBg: 'bg-[#C07050] text-white'
-		},
-		{
-			name: 'Arjun Desai',
-			id: 'ENG024032',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'MBA',
-			status: 'Pending',
-			avatarBg: 'bg-[#2A4D69] text-white'
-		},
-		{
-			name: 'Sneha Kumar',
-			id: 'ENG024075',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'MCA',
-			status: 'Active',
-			avatarBg: 'bg-[#7D4427] text-white'
-		},
-		{
-			name: 'Dr. Vikram Singh',
-			id: 'MNT024008',
-			role: 'Admin',
-			displayRole: 'Mentor',
-			dept: 'Mtech CS',
-			status: 'Active',
-			avatarBg: 'bg-[#3A6B88] text-white'
-		},
-		{
-			name: 'Kavya Krishnan',
-			id: 'ENG024099',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'Mtech IT',
-			status: 'Inactive',
-			avatarBg: 'bg-[#7A6B3A] text-white'
-		},
-		{
-			name: 'Admin Coordinator',
-			id: 'ADM024001',
-			role: 'Admin',
-			displayRole: 'Admin',
-			dept: 'MBA',
-			status: 'Active',
-			avatarBg: 'bg-[#244E3F] text-white'
-		},
-		{
-			name: 'Dev Mehta',
-			id: 'ENG024112',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'Mtech CS',
-			status: 'Active',
-			avatarBg: 'bg-[#B04A3A] text-white'
-		},
-		{
-			name: 'Dr. Anita Rao',
-			id: 'MNT024012',
-			role: 'Admin',
-			displayRole: 'Mentor',
-			dept: 'MCA',
-			status: 'Pending',
-			avatarBg: 'bg-[#4E6B4E] text-white'
-		},
-		{
-			name: 'Rohan Nair',
-			id: 'ENG024055',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'MBA',
-			status: 'Active',
-			avatarBg: 'bg-[#3C4A8E] text-white'
-		},
-		{
-			name: 'Meera Joshi',
-			id: 'ENG024143',
-			role: 'Student',
-			displayRole: 'Student',
-			dept: 'Mtech IT',
-			status: 'Active',
-			avatarBg: 'bg-[#A63A50] text-white'
-		},
-		{
-			name: 'Dr. Suresh Iyer',
-			id: 'MNT024019',
-			role: 'Admin',
-			displayRole: 'Mentor',
-			dept: 'MCA',
-			status: 'Active',
-			avatarBg: 'bg-[#6B5E33] text-white'
-		}
-	]);
+	// Users come from the API. recentUsers is just the newest slice of the same
+	// registry, so the two can never drift apart.
+	let userRegistry = $state<PlatformUser[]>([]);
+	const recentUsers = $derived(userRegistry.slice(0, 5));
 
 	let userFilter = $state('All');
 	let userSearch = $state('');
@@ -236,16 +185,16 @@
 		})
 	);
 
-	let totalStudentsCount = $derived(userRegistry.filter((u) => u.role === 'Student').length + 1236);
-	let totalMentorsCount = $derived(
-		userRegistry.filter((u) => u.displayRole === 'Mentor').length + 83
+	// Counted from the real registry. These used to add a fixed number to each
+	// count, which made every figure on this page fictional.
+	let totalStudentsCount = $derived(userRegistry.filter((u) => u.role === 'Student').length);
+	let totalMentorsCount = $derived(userRegistry.filter((u) => u.displayRole === 'Mentor').length);
+	let totalAdminsCount = $derived(
+		userRegistry.filter((u) => u.displayRole === 'Admin' || u.displayRole === 'Super Admin').length
 	);
-	let totalAdminsCount = $derived(userRegistry.filter((u) => u.displayRole === 'Admin').length + 5);
-	let activeUsersCount = $derived(userRegistry.filter((u) => u.status === 'Active').length + 1179);
-	let pendingUsersCount = $derived(userRegistry.filter((u) => u.status === 'Pending').length + 46);
-	let inactiveUsersCount = $derived(
-		userRegistry.filter((u) => u.status === 'Inactive').length + 105
-	);
+	let activeUsersCount = $derived(userRegistry.filter((u) => u.status === 'Active').length);
+	let pendingUsersCount = $derived(userRegistry.filter((u) => u.status === 'Pending').length);
+	let inactiveUsersCount = $derived(userRegistry.filter((u) => u.status === 'Inactive').length);
 
 	// Mock Recent System Activities (Step 5)
 	let recentLogs = $state([
@@ -303,6 +252,11 @@
 	let newUserName = $state('');
 	let newUserRole = $state('Student');
 	let newUserDept = $state('');
+	let newUserId = $state('');
+	let newUserEmail = $state('');
+	let newUserSemester = $state(1);
+	let createUserError = $state('');
+	let creatingUser = $state(false);
 	let newActivityName = $state('');
 	let newActivityCredits = $state(5);
 	let newTrackName = $state('');
@@ -557,67 +511,88 @@
 		}, 3000);
 	}
 
-	function handleCreateUser(e: Event) {
+	async function handleCreateUser(e: Event) {
 		e.preventDefault();
-		if (!newUserName.trim()) return;
-		const generatedId =
-			newUserRole === 'Student'
-				? `ENR024${Math.floor(100 + Math.random() * 900)}`
-				: `ADM024${Math.floor(100 + Math.random() * 900)}`;
-		recentUsers = [
-			{
-				name: newUserName,
-				id: generatedId,
-				role: newUserRole,
-				dept: newUserDept || 'Computer Science',
-				status: 'Active'
-			},
-			...recentUsers
-		];
+		if (creatingUser) return;
 
-		const avatarColors = [
-			'bg-[#802D2D] text-white',
-			'bg-[#C07050] text-white',
-			'bg-[#2A4D69] text-white',
-			'bg-[#7D4427] text-white',
-			'bg-[#3A6B88] text-white',
-			'bg-[#7A6B3A] text-white',
-			'bg-[#244E3F] text-white',
-			'bg-[#B04A3A] text-white',
-			'bg-[#4E6B4E] text-white',
-			'bg-[#3C4A8E] text-white',
-			'bg-[#A63A50] text-white',
-			'bg-[#6B5E33] text-white'
-		];
-		const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+		createUserError = '';
+		creatingUser = true;
 
-		userRegistry = [
-			{
-				name: newUserName,
-				id: generatedId,
-				role: newUserRole,
-				displayRole: newUserRole === 'Admin' ? 'Admin' : newUserRole,
-				dept: newUserDept || 'Computer Science',
-				status: 'Active',
-				avatarBg: randomColor
-			},
-			...userRegistry
-		];
+		try {
+			const res = await fetch(`${API_BASE_URL}/api/admin/platform/users`, {
+				method: 'POST',
+				headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					name: newUserName,
+					role: newUserRole,
+					id: newUserId,
+					email: newUserEmail,
+					dept: newUserDept,
+					semester: newUserRole === 'Student' ? Number(newUserSemester) : 0
+				})
+			});
 
-		recentLogs = [
-			{
-				activity: `New ${newUserRole.toLowerCase()} account created for ${newUserName}`,
-				type: 'User Added',
-				performedBy: 'Super Admin',
-				date: 'Jun 28, 2026',
-				status: 'Completed'
-			},
-			...recentLogs
-		];
-		triggerToast(`User "${newUserName}" created successfully!`);
-		newUserName = '';
-		newUserDept = '';
-		isCreateUserModalOpen = false;
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.error || 'Failed to create user');
+			}
+
+			// Reload from the server rather than guessing what was stored, so the
+			// registry and the stat cards always agree with the database.
+			await loadPlatformData();
+
+			recentLogs = [
+				{
+					activity: `New ${newUserRole.toLowerCase()} account created for ${newUserName}`,
+					type: 'User Added',
+					performedBy: 'Super Admin',
+					date: new Date().toLocaleDateString('en-GB', {
+						day: '2-digit',
+						month: 'short',
+						year: 'numeric'
+					}),
+					status: 'Completed'
+				},
+				...recentLogs
+			];
+
+			// Shown once: the account has no other way to get its first password.
+			triggerToast(`"${newUserName}" created. Temporary password: ${data.temporary_password}`);
+
+			newUserName = '';
+			newUserDept = '';
+			newUserId = '';
+			newUserEmail = '';
+			newUserSemester = 1;
+			isCreateUserModalOpen = false;
+		} catch (err) {
+			createUserError = err instanceof Error ? err.message : 'Failed to create user';
+		} finally {
+			creatingUser = false;
+		}
+	}
+
+	async function handleDeleteUser(user: PlatformUser) {
+		if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
+
+		try {
+			const res = await fetch(`${API_BASE_URL}/api/admin/platform/users/${user.id}`, {
+				method: 'DELETE',
+				headers: authHeaders()
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.error || 'Failed to delete user');
+			}
+
+			await loadPlatformData();
+			triggerToast(`User "${user.name}" removed successfully.`);
+		} catch (err) {
+			triggerToast(err instanceof Error ? err.message : 'Failed to delete user');
+		}
 	}
 
 	function handleCreateActivity(e: Event) {
@@ -959,7 +934,8 @@
 	}
 
 	function handleLogout() {
-		window.location.href = '/';
+		localStorage.removeItem('superadmin_token');
+		goto('/super-admin-portal');
 	}
 </script>
 
@@ -1286,6 +1262,22 @@
 
 		<!-- Main Content Body -->
 		<main class="flex-grow p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto max-w-7xl mx-auto w-full">
+			{#if loadError}
+				<div
+					class="flex items-center justify-between gap-4 p-4 bg-red-50 border border-red-200 rounded-xl"
+					role="alert"
+				>
+					<span class="text-xs font-semibold text-red-700">{loadError}</span>
+					<button
+						type="button"
+						onclick={loadPlatformData}
+						class="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+					>
+						Retry
+					</button>
+				</div>
+			{/if}
+
 			{#if currentTab === 'Dashboard'}
 				<!-- Dashboard Statistics Cards Grid (Step 2) -->
 				<section
@@ -1297,7 +1289,9 @@
 						class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
 					>
 						<div class="flex items-center justify-between">
-							<span class="text-2xl font-bold font-serif text-slate-900">1,248</span>
+							<span class="text-2xl font-bold font-serif text-slate-900"
+								>{stats.total_students}</span
+							>
 							<div
 								class="p-2.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 animate-pulse"
 							>
@@ -1331,9 +1325,7 @@
 						class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
 					>
 						<div class="flex items-center justify-between">
-							<span class="text-2xl font-bold font-serif text-slate-900"
-								>{recentUsers.filter((u) => u.role === 'Admin').length + 85}</span
-							>
+							<span class="text-2xl font-bold font-serif text-slate-900">{stats.total_admins}</span>
 							<div class="p-2.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
 								<!-- Single user admin icon -->
 								<svg
@@ -1365,7 +1357,9 @@
 						class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
 					>
 						<div class="flex items-center justify-between">
-							<span class="text-2xl font-bold font-serif text-slate-900">3,412</span>
+							<span class="text-2xl font-bold font-serif text-slate-900"
+								>{stats.total_activities}</span
+							>
 							<div class="p-2.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
 								<!-- Graph icon -->
 								<svg
@@ -1397,7 +1391,8 @@
 						class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
 					>
 						<div class="flex items-center justify-between">
-							<span class="text-2xl font-bold font-serif text-slate-900">6</span>
+							<span class="text-2xl font-bold font-serif text-slate-900">{stats.active_tracks}</span
+							>
 							<div class="p-2.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
 								<!-- Stack icon -->
 								<svg
@@ -2057,12 +2052,7 @@
 														</button>
 														<button
 															type="button"
-															onclick={() => {
-																if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-																	userRegistry = userRegistry.filter((u) => u.id !== user.id);
-																	triggerToast(`User "${user.name}" removed successfully.`);
-																}
-															}}
+															onclick={() => handleDeleteUser(user)}
 															aria-label="Delete user"
 															class="hover:text-red-650 transition-colors p-0.5"
 														>
@@ -3482,6 +3472,65 @@
 								/>
 							</div>
 						</div>
+
+						<div class="grid grid-cols-2 gap-4">
+							<div class="flex flex-col gap-1.5">
+								<label
+									for="new-user-id"
+									class="text-[10px] font-extrabold text-slate-650 tracking-wider"
+									>{newUserRole === 'Student' ? 'ROLL NUMBER *' : 'ADMIN ID *'}</label
+								>
+								<input
+									id="new-user-id"
+									type="text"
+									bind:value={newUserId}
+									placeholder={newUserRole === 'Student' ? 'e.g. IT2K24012' : 'e.g. mentor.cs'}
+									required
+									class="px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-355"
+								/>
+							</div>
+
+							<div class="flex flex-col gap-1.5">
+								<label
+									for="new-user-email"
+									class="text-[10px] font-extrabold text-slate-650 tracking-wider">EMAIL *</label
+								>
+								<input
+									id="new-user-email"
+									type="email"
+									bind:value={newUserEmail}
+									placeholder="e.g. amit@iips.edu"
+									required
+									class="px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-355"
+								/>
+							</div>
+						</div>
+
+						{#if newUserRole === 'Student'}
+							<div class="flex flex-col gap-1.5">
+								<label
+									for="new-user-semester"
+									class="text-[10px] font-extrabold text-slate-650 tracking-wider">SEMESTER</label
+								>
+								<input
+									id="new-user-semester"
+									type="number"
+									min="1"
+									max="10"
+									bind:value={newUserSemester}
+									class="px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-355"
+								/>
+							</div>
+						{/if}
+
+						{#if createUserError}
+							<div
+								class="p-3 bg-red-50 border border-red-200 rounded-lg text-[11px] font-semibold text-red-700"
+								role="alert"
+							>
+								{createUserError}
+							</div>
+						{/if}
 					</div>
 
 					<div
@@ -3496,9 +3545,10 @@
 						</button>
 						<button
 							type="submit"
-							class="px-4 py-2 bg-[#881B1B] hover:bg-[#881B1B]/90 text-white font-bold text-xs uppercase rounded-lg transition-colors focus:outline-none"
+							disabled={creatingUser}
+							class="px-4 py-2 bg-[#881B1B] hover:bg-[#881B1B]/90 text-white font-bold text-xs uppercase rounded-lg transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							Create User
+							{creatingUser ? 'Creating…' : 'Create User'}
 						</button>
 					</div>
 				</form>
