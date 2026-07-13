@@ -14,13 +14,11 @@
 		updated_at: string;
 	}
 
-	interface ProfessionalInfo {
-		designation: string;
-		department: string;
-		experience: string;
-		qualification: string;
-		specialization: string;
-		mentorSince: string;
+	interface BatchInfo {
+		batch: string;
+		course: string;
+		semester: string;
+		studentCount: number;
 	}
 
 	// Props using Svelte 5 runes
@@ -41,6 +39,7 @@
 	let verifiedCertificatesCount = $state(0);
 	let pendingReviewsCount = $state(0);
 	let activitiesSupervisedCount = $state(0);
+	let assignedBatches = $state<BatchInfo[]>([]);
 
 	function getInitials(name: string): string {
 		if (!name) return 'A';
@@ -65,40 +64,6 @@
 		if (adminId === 'superadmin') return 'EMP-2026-001';
 		return `EMP-2026-${adminId.toUpperCase()}`;
 	}
-
-	function getProfessionalInfo(adminId: string): ProfessionalInfo {
-		if (adminId === 'admin') {
-			return {
-				designation: 'Associate Professor',
-				department: 'Computer Applications',
-				experience: '12 Years',
-				qualification: 'Ph.D. (Computer Science)',
-				specialization: 'Database Systems & Data Mining',
-				mentorSince: '2020'
-			};
-		}
-		if (adminId === 'admin2') {
-			return {
-				designation: 'Assistant Professor',
-				department: 'Computer Applications',
-				experience: '8 Years',
-				qualification: 'Ph.D. (Computer Science)',
-				specialization: 'Software Engineering',
-				mentorSince: '2025'
-			};
-		}
-		return {
-			designation: 'Senior Administrator',
-			department: 'Administration',
-			experience: '15 Years',
-			qualification: 'Ph.D. (Information Technology)',
-			specialization: 'Institutional Governance',
-			mentorSince: '2018'
-		};
-	}
-
-	// Derived professional info
-	let prof = $derived(admin ? getProfessionalInfo(admin.admin_id) : null);
 
 	// Fetch dynamic stats from students list
 	onMount(async () => {
@@ -127,8 +92,10 @@
 			let verified = 0;
 			let pending = 0;
 			const uniqueActivityIds: number[] = [];
+			const grouped: BatchInfo[] = [];
 
 			for (const s of studentsList) {
+				// 1. Count certificates
 				if (s.certificates) {
 					for (const cert of s.certificates) {
 						if (cert.status === 'Approved') {
@@ -139,6 +106,8 @@
 						}
 					}
 				}
+
+				// 2. Count supervised activities
 				if (s.enrollments) {
 					for (const enrollment of s.enrollments) {
 						if (enrollment.activity_id && !uniqueActivityIds.includes(enrollment.activity_id)) {
@@ -146,11 +115,33 @@
 						}
 					}
 				}
+
+				// 3. Group by Batch / Course / Semester
+				if (admin) {
+					const batch = s.roll_no?.match(/^[A-Z]+2K\d+/)?.[0] ?? admin.assigned_batch ?? 'Unknown';
+					const course = s.course_name || '—';
+					const semester = s.semester ? `Semester ${s.semester}` : '—';
+
+					const existing = grouped.find(
+						(g) => g.batch === batch && g.course === course && g.semester === semester
+					);
+					if (existing) {
+						existing.studentCount++;
+					} else {
+						grouped.push({
+							batch,
+							course,
+							semester,
+							studentCount: 1
+						});
+					}
+				}
 			}
 
 			verifiedCertificatesCount = verified;
 			pendingReviewsCount = pending;
 			activitiesSupervisedCount = uniqueActivityIds.length;
+			assignedBatches = grouped;
 		} catch (err) {
 			console.error('Error fetching admin profile stats:', err);
 			statsError = err instanceof Error ? err.message : 'Error loading overview data';
@@ -291,7 +282,9 @@
 							</svg>
 							<div class="flex items-center gap-1.5">
 								<span class="text-slate-500 font-semibold">Department:</span>
-								<span class="font-bold text-slate-800">Computer Applications</span>
+								<span class="font-bold text-slate-800">
+									{admin.assigned_batch ? 'Computer Applications' : '—'}
+								</span>
 							</div>
 						</div>
 
@@ -357,7 +350,9 @@
 							</svg>
 							<div class="flex items-center gap-1.5">
 								<span class="text-slate-500 font-semibold">Contact:</span>
-								<span class="font-bold text-slate-800">+91 XXXXX XXXXX</span>
+								<span class="font-bold text-slate-800">
+									{admin.assigned_batch ? '+91 XXXXX XXXXX' : '—'}
+								</span>
 							</div>
 						</div>
 
@@ -384,7 +379,9 @@
 							</svg>
 							<div class="flex items-center gap-1.5">
 								<span class="text-slate-500 font-semibold">Office Location:</span>
-								<span class="font-bold text-slate-800">IIPS, Block B</span>
+								<span class="font-bold text-slate-800">
+									{admin.assigned_batch ? 'IIPS, Block B' : '—'}
+								</span>
 							</div>
 						</div>
 					</div>
@@ -410,9 +407,7 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Designation</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2"
-							>{prof ? prof.designation : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-400 mt-2">—</span>
 					</div>
 
 					<!-- Department -->
@@ -422,8 +417,9 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Department</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2">{prof ? prof.department : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-800 mt-2">
+							{admin.assigned_batch ? 'Computer Applications' : '—'}
+						</span>
 					</div>
 
 					<!-- Years of Experience -->
@@ -433,8 +429,7 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Years of Experience</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2">{prof ? prof.experience : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-400 mt-2">—</span>
 					</div>
 
 					<!-- Qualification -->
@@ -444,9 +439,7 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Qualification</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2"
-							>{prof ? prof.qualification : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-400 mt-2">—</span>
 					</div>
 
 					<!-- Specialization -->
@@ -456,9 +449,7 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Specialization</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2"
-							>{prof ? prof.specialization : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-400 mt-2">—</span>
 					</div>
 
 					<!-- Mentor Since -->
@@ -468,9 +459,7 @@
 						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
 							>Mentor Since</span
 						>
-						<span class="text-xs font-bold text-slate-805 mt-2"
-							>{prof ? prof.mentorSince : '—'}</span
-						>
+						<span class="text-xs font-bold text-slate-400 mt-2">—</span>
 					</div>
 				</div>
 			</div>
@@ -495,14 +484,21 @@
 						{/each}
 					</div>
 				{:else if statsError}
-					<!-- Stats Error State -->
-					<div
-						class="flex-grow flex items-center justify-center p-6 text-center text-rose-500 bg-rose-50/50 border border-rose-100 rounded-xl"
-					>
-						<div class="space-y-1">
-							<p class="text-xs font-bold">Failed to load statistics</p>
-							<p class="text-[10px] text-rose-450">{statsError}</p>
-						</div>
+					<!-- Stats Empty State Placeholder -->
+					<div class="grid grid-cols-2 gap-4 flex-grow">
+						{#each ['Assigned Students', 'Certificates Verified', 'Pending Reviews', 'Activities Supervised'] as label}
+							<div
+								class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center text-center justify-center"
+							>
+								<span class="text-2xl font-bold font-serif text-slate-400 mt-3 leading-none">—</span
+								>
+								<span
+									class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2 leading-tight"
+								>
+									{label}
+								</span>
+							</div>
+						{/each}
 					</div>
 				{:else}
 					<!-- Stats Content -->
@@ -636,6 +632,227 @@
 						</div>
 					</div>
 				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Account Security & Assigned Batches Row -->
+	{#if !loading && !error && admin}
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<!-- Account Security Card -->
+			<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col">
+				<h3 class="text-xs font-bold text-slate-405 tracking-wider uppercase font-sans mb-5">
+					Account Security
+				</h3>
+
+				<div class="flex-grow space-y-1">
+					<!-- Email Verification -->
+					<div
+						class="flex items-center justify-between py-3 border-b border-slate-100 text-xs font-semibold text-slate-700"
+					>
+						<div class="flex items-center gap-2.5">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="2"
+								stroke="currentColor"
+								class="w-4 h-4 text-slate-400"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068"
+								/>
+							</svg>
+							<span>Email Verification</span>
+						</div>
+						<span class="text-emerald-600 font-bold">Verified</span>
+					</div>
+
+					<!-- Two-Factor Authentication -->
+					<div
+						class="flex items-center justify-between py-3 border-b border-slate-100 text-xs font-semibold text-slate-700"
+					>
+						<div class="flex items-center gap-2.5">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="2"
+								stroke="currentColor"
+								class="w-4 h-4 text-slate-400"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M9 12.75 11.25 15 15 9.75m-3-3.75h.008v.008H12V9Z"
+								/>
+							</svg>
+							<span>Two-Factor Authentication</span>
+						</div>
+						<span class="text-slate-400 font-normal">Disabled</span>
+					</div>
+
+					<!-- Last Password Change -->
+					<div
+						class="flex items-center justify-between py-3 border-b border-slate-100 text-xs font-semibold text-slate-700"
+					>
+						<div class="flex items-center gap-2.5">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="2"
+								stroke="currentColor"
+								class="w-4 h-4 text-slate-400"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H3.75v-2.25H6V17.25h2.25v-2.25h1.5l1.688-1.688a1.5 1.5 0 011.06-.439c.362 0 .71-.143.963-.398L15.75 5.25Z"
+								/>
+							</svg>
+							<span>Last Password Change</span>
+						</div>
+						<span class="text-slate-400 font-normal">—</span>
+					</div>
+
+					<!-- Last Login -->
+					<div
+						class="flex items-center justify-between py-3 border-b border-slate-100 text-xs font-semibold text-slate-700"
+					>
+						<div class="flex items-center gap-2.5">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="2"
+								stroke="currentColor"
+								class="w-4 h-4 text-slate-400"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							<span>Last Login</span>
+						</div>
+						<span class="text-slate-400 font-normal">—</span>
+					</div>
+
+					<!-- Login Devices -->
+					<div class="flex items-center justify-between py-3 text-xs font-semibold text-slate-700">
+						<div class="flex items-center gap-2.5">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="2"
+								stroke="currentColor"
+								class="w-4 h-4 text-slate-400"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"
+								/>
+							</svg>
+							<span>Login Devices</span>
+						</div>
+						<span class="text-slate-805 font-bold">Current Session</span>
+					</div>
+				</div>
+
+				<!-- Action buttons -->
+				<div class="grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-slate-100">
+					<button
+						type="button"
+						class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-800 bg-white rounded-lg text-xs font-bold transition-colors cursor-pointer focus:outline-none text-center shadow-3xs"
+					>
+						Manage Security
+					</button>
+					<button
+						type="button"
+						class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-800 bg-white rounded-lg text-xs font-bold transition-colors cursor-pointer focus:outline-none text-center shadow-3xs"
+					>
+						View Login History
+					</button>
+				</div>
+			</div>
+
+			<!-- Assigned Batches Card -->
+			<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col">
+				<h3 class="text-xs font-bold text-slate-405 tracking-wider uppercase font-sans mb-5">
+					Assigned Batches
+				</h3>
+
+				<div class="flex-grow overflow-x-auto">
+					<table class="w-full text-left text-xs border-collapse">
+						<thead>
+							<tr
+								class="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+							>
+								<th class="pb-3 font-semibold">Batch</th>
+								<th class="pb-3 font-semibold">Course</th>
+								<th class="pb-3 font-semibold">Semester</th>
+								<th class="pb-3 font-semibold text-right">Students</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#if statsLoading}
+								<!-- Loading Rows -->
+								{#each Array(2) as _}
+									<tr class="animate-pulse border-b border-slate-50 last:border-b-0">
+										<td class="py-3.5"><div class="h-4 bg-slate-200 rounded w-16"></div></td>
+										<td class="py-3.5"><div class="h-4 bg-slate-200 rounded w-12"></div></td>
+										<td class="py-3.5"><div class="h-4 bg-slate-200 rounded w-20"></div></td>
+										<td class="py-3.5 text-right"
+											><div class="h-4 bg-slate-200 rounded w-16 ml-auto"></div></td
+										>
+									</tr>
+								{/each}
+							{:else if statsError || assignedBatches.length === 0}
+								<!-- Empty state placeholder -->
+								<tr>
+									<td colspan="4" class="py-12 text-center text-slate-400 font-medium font-sans">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="w-8 h-8 mx-auto mb-2 text-slate-300"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+											/>
+										</svg>
+										No assigned batches available
+									</td>
+								</tr>
+							{:else}
+								{#each assignedBatches as b}
+									<tr class="border-b border-slate-50 last:border-b-0 font-semibold text-slate-800">
+										<td class="py-3.5 text-slate-900 font-bold">{b.batch}</td>
+										<td class="py-3.5 text-slate-500">{b.course}</td>
+										<td class="py-3.5 text-slate-500">{b.semester}</td>
+										<td class="py-3.5 text-right">
+											<span
+												class="px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-200 rounded-md text-[10px] font-bold"
+											>
+												{b.studentCount} Students
+											</span>
+										</td>
+									</tr>
+								{/each}
+							{/if}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	{/if}
