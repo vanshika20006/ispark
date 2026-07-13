@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { API_BASE_URL } from '$lib/config';
 
 	// Types
 	interface AdminProfile {
@@ -12,6 +14,15 @@
 		updated_at: string;
 	}
 
+	interface ProfessionalInfo {
+		designation: string;
+		department: string;
+		experience: string;
+		qualification: string;
+		specialization: string;
+		mentorSince: string;
+	}
+
 	// Props using Svelte 5 runes
 	let {
 		admin,
@@ -22,6 +33,14 @@
 		loading: boolean;
 		error: string | null;
 	} = $props();
+
+	// Stats state using Svelte 5 runes
+	let statsLoading = $state(true);
+	let statsError = $state<string | null>(null);
+	let assignedStudentsCount = $state(0);
+	let verifiedCertificatesCount = $state(0);
+	let pendingReviewsCount = $state(0);
+	let activitiesSupervisedCount = $state(0);
 
 	function getInitials(name: string): string {
 		if (!name) return 'A';
@@ -46,6 +65,99 @@
 		if (adminId === 'superadmin') return 'EMP-2026-001';
 		return `EMP-2026-${adminId.toUpperCase()}`;
 	}
+
+	function getProfessionalInfo(adminId: string): ProfessionalInfo {
+		if (adminId === 'admin') {
+			return {
+				designation: 'Associate Professor',
+				department: 'Computer Applications',
+				experience: '12 Years',
+				qualification: 'Ph.D. (Computer Science)',
+				specialization: 'Database Systems & Data Mining',
+				mentorSince: '2020'
+			};
+		}
+		if (adminId === 'admin2') {
+			return {
+				designation: 'Assistant Professor',
+				department: 'Computer Applications',
+				experience: '8 Years',
+				qualification: 'Ph.D. (Computer Science)',
+				specialization: 'Software Engineering',
+				mentorSince: '2025'
+			};
+		}
+		return {
+			designation: 'Senior Administrator',
+			department: 'Administration',
+			experience: '15 Years',
+			qualification: 'Ph.D. (Information Technology)',
+			specialization: 'Institutional Governance',
+			mentorSince: '2018'
+		};
+	}
+
+	// Derived professional info
+	let prof = $derived(admin ? getProfessionalInfo(admin.admin_id) : null);
+
+	// Fetch dynamic stats from students list
+	onMount(async () => {
+		const token = localStorage.getItem('admin_token');
+		if (!token) {
+			statsLoading = false;
+			return;
+		}
+
+		try {
+			const res = await fetch(`${API_BASE_URL}/api/admin/students`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			if (!res.ok) {
+				throw new Error('Failed to fetch students stats');
+			}
+
+			const data = await res.json();
+			const studentsList = data.students || [];
+
+			assignedStudentsCount = studentsList.length;
+
+			let verified = 0;
+			let pending = 0;
+			const uniqueActivityIds: number[] = [];
+
+			for (const s of studentsList) {
+				if (s.certificates) {
+					for (const cert of s.certificates) {
+						if (cert.status === 'Approved') {
+							verified++;
+						}
+						if (cert.status === 'Pending') {
+							pending++;
+						}
+					}
+				}
+				if (s.enrollments) {
+					for (const enrollment of s.enrollments) {
+						if (enrollment.activity_id && !uniqueActivityIds.includes(enrollment.activity_id)) {
+							uniqueActivityIds.push(enrollment.activity_id);
+						}
+					}
+				}
+			}
+
+			verifiedCertificatesCount = verified;
+			pendingReviewsCount = pending;
+			activitiesSupervisedCount = uniqueActivityIds.length;
+		} catch (err) {
+			console.error('Error fetching admin profile stats:', err);
+			statsError = err instanceof Error ? err.message : 'Error loading overview data';
+		} finally {
+			statsLoading = false;
+		}
+	});
 </script>
 
 <div class="space-y-6 font-sans" transition:fade={{ duration: 150 }}>
@@ -280,4 +392,251 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Professional Information & Administrative Overview Row -->
+	{#if !loading && !error && admin}
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<!-- Professional Information Card -->
+			<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col">
+				<h3 class="text-xs font-bold text-slate-405 tracking-wider uppercase font-sans mb-5">
+					Professional Information
+				</h3>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
+					<!-- Designation -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Designation</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2"
+							>{prof ? prof.designation : '—'}</span
+						>
+					</div>
+
+					<!-- Department -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Department</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2">{prof ? prof.department : '—'}</span
+						>
+					</div>
+
+					<!-- Years of Experience -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Years of Experience</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2">{prof ? prof.experience : '—'}</span
+						>
+					</div>
+
+					<!-- Qualification -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Qualification</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2"
+							>{prof ? prof.qualification : '—'}</span
+						>
+					</div>
+
+					<!-- Specialization -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Specialization</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2"
+							>{prof ? prof.specialization : '—'}</span
+						>
+					</div>
+
+					<!-- Mentor Since -->
+					<div
+						class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col justify-between"
+					>
+						<span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none"
+							>Mentor Since</span
+						>
+						<span class="text-xs font-bold text-slate-805 mt-2"
+							>{prof ? prof.mentorSince : '—'}</span
+						>
+					</div>
+				</div>
+			</div>
+
+			<!-- Administrative Overview Card -->
+			<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col">
+				<h3 class="text-xs font-bold text-slate-405 tracking-wider uppercase font-sans mb-5">
+					Administrative Overview
+				</h3>
+
+				{#if statsLoading}
+					<!-- Stats Loading State -->
+					<div class="grid grid-cols-2 gap-4 flex-grow items-center">
+						{#each Array(4) as _}
+							<div
+								class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center justify-center animate-pulse h-28"
+							>
+								<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+								<div class="h-6 bg-slate-200 rounded w-1/3 mt-3"></div>
+								<div class="h-3 bg-slate-200 rounded w-2/3 mt-2"></div>
+							</div>
+						{/each}
+					</div>
+				{:else if statsError}
+					<!-- Stats Error State -->
+					<div
+						class="flex-grow flex items-center justify-center p-6 text-center text-rose-500 bg-rose-50/50 border border-rose-100 rounded-xl"
+					>
+						<div class="space-y-1">
+							<p class="text-xs font-bold">Failed to load statistics</p>
+							<p class="text-[10px] text-rose-450">{statsError}</p>
+						</div>
+					</div>
+				{:else}
+					<!-- Stats Content -->
+					<div class="grid grid-cols-2 gap-4 flex-grow">
+						<!-- Assigned Students -->
+						<div
+							class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center text-center justify-center hover:shadow-2xs transition-shadow"
+						>
+							<div
+								class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="2"
+									stroke="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 10.089 21c-2.316 0-4.445-.69-6.22-1.879v-.003a4.125 4.125 0 0 1 7.533-2.493M15 19.128v-.003c0-1.112-.285-2.16-.786-3.07M14.214 16.058A9.396 9.396 0 0 0 10.089 15c-1.47 0-2.854.34-4.082.945"
+									/>
+								</svg>
+							</div>
+							<span class="text-2xl font-bold font-serif text-slate-900 mt-3 leading-none">
+								{assignedStudentsCount}
+							</span>
+							<span
+								class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-tight"
+							>
+								Assigned Students
+							</span>
+						</div>
+
+						<!-- Certificates Verified -->
+						<div
+							class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center text-center justify-center hover:shadow-2xs transition-shadow"
+						>
+							<div
+								class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="2"
+									stroke="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
+									/>
+								</svg>
+							</div>
+							<span class="text-2xl font-bold font-serif text-slate-900 mt-3 leading-none">
+								{verifiedCertificatesCount}
+							</span>
+							<span
+								class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-tight"
+							>
+								Certificates Verified
+							</span>
+						</div>
+
+						<!-- Pending Reviews -->
+						<div
+							class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center text-center justify-center hover:shadow-2xs transition-shadow"
+						>
+							<div
+								class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="2"
+									stroke="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+									/>
+								</svg>
+							</div>
+							<span class="text-2xl font-bold font-serif text-slate-900 mt-3 leading-none">
+								{pendingReviewsCount}
+							</span>
+							<span
+								class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-tight"
+							>
+								Pending Reviews
+							</span>
+						</div>
+
+						<!-- Activities Supervised -->
+						<div
+							class="bg-slate-50 border border-slate-150 rounded-xl p-4 flex flex-col items-center text-center justify-center hover:shadow-2xs transition-shadow"
+						>
+							<div
+								class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="2"
+									stroke="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+									/>
+								</svg>
+							</div>
+							<span class="text-2xl font-bold font-serif text-slate-900 mt-3 leading-none">
+								{activitiesSupervisedCount}
+							</span>
+							<span
+								class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-tight"
+							>
+								Activities Supervised
+							</span>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
 </div>
