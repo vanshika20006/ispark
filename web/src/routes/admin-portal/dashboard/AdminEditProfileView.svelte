@@ -47,12 +47,17 @@
 		errorMsg = null;
 		successMsg = null;
 
-		if (!name.trim()) {
+		// Trim fields
+		name = name.trim();
+		email = email.trim();
+
+		// Reject empty or invalid fields
+		if (!name) {
 			errorMsg = 'Name is required';
 			return;
 		}
 
-		if (!email.trim()) {
+		if (!email) {
 			errorMsg = 'Email is required';
 			return;
 		}
@@ -79,14 +84,17 @@
 					Authorization: `Bearer ${token}`
 				},
 				body: JSON.stringify({
-					name: name.trim(),
-					email: email.trim()
+					name,
+					email
 				})
 			});
 
 			const data = await res.json();
 
 			if (!res.ok) {
+				if (res.status === 409) {
+					throw new Error('Email already exists. Please use a different email.');
+				}
 				throw new Error(data.error || 'Failed to update profile');
 			}
 

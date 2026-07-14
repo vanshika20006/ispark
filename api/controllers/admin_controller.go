@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/iips-oss/ispark/api/config"
 	"github.com/iips-oss/ispark/api/models"
@@ -227,8 +229,20 @@ func UpdateAdminProfile(c *fiber.Ctx) error {
 		return errJSON(c, fiber.StatusBadRequest, "Cannot parse JSON")
 	}
 
+	// Trim inputs
+	input.Name = strings.TrimSpace(input.Name)
+	input.Email = strings.TrimSpace(input.Email)
+
 	if input.Name == "" || input.Email == "" {
 		return errJSON(c, fiber.StatusBadRequest, "Name and Email are required")
+	}
+
+	// Check if email already exists for another admin
+	var existing models.Admin
+	if err := config.DB.Where("email = ? AND admin_id <> ?", input.Email, admin.AdminID).First(&existing).Error; err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Email already exists.",
+		})
 	}
 
 	admin.Name = input.Name
