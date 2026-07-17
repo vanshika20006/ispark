@@ -180,32 +180,25 @@
 	// Recent updates timeline data derived from actual registered activities, or falling back to stats
 	// Type/color language is kept consistent with the status pills used elsewhere in this file:
 	// emerald = Completed/Verified, amber = Pending Verification, rose = Rejected, blue = Registered
+
+	// Recent updates timeline data derived from actual registered activities, or falling back to stats
 	const recentUpdates: RecentUpdate[] = $derived.by(() => {
 		if (registeredActivities.length > 0) {
-			return registeredActivities.slice(0, 4).map((act) => {
-				let type: 'success' | 'star' | 'doc' | 'db' | 'info' = 'success';
-				let text = `Enrolled in ${act.name} (${act.status})`;
-
+			return registeredActivities.slice(0, 3).map((act) => {
+				let type: 'success' | 'star' | 'doc' | 'db' = 'success';
 				if (act.status === 'Verified') {
 					type = 'star';
-					text = `Certificate verified for ${act.name}`;
 				} else if (act.status === 'Pending Verification') {
 					type = 'doc';
-					text = `${act.name} awaiting verification`;
 				} else if (act.status === 'Rejected') {
 					type = 'db';
-					text = `Certificate rejected for ${act.name}`;
 				} else if (act.status === 'Completed') {
 					type = 'success';
-					text = `${act.name} marked as completed`;
-				} else if (act.status === 'Registered') {
-					type = 'info';
-					text = `Registration confirmed for ${act.name}`;
 				}
 
 				return {
 					type,
-					text,
+					text: `Enrolled in ${act.name} (${act.status})`,
 					time: act.enrollmentDate
 				};
 			});
